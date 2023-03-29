@@ -1,3 +1,6 @@
+pub mod structs;
+pub use structs::*;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
