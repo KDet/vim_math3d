@@ -1,11 +1,15 @@
 [package]
-name = "vim_math3d"
+name = "vim_math3d_macro_derive"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-num-traits = "0.2.15"
+[lib]
+proc-macro = true
 
-vim_math3d_macro_derive = { path = "./vim_math3d_macro_derive" }
+[dependencies]
+syn = "2.0.11"
+quote = "1.0.26"
+
+num-traits = "0.2.15"
