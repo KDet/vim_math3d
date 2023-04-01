@@ -20,3 +20,16 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+
+
+// let to_degrees_impl = {
+//     let field_initializers_to_degrees = fields.iter().map(|field| {
+//         let field_name = &field.ident;
+//         quote! { #field_name: self.#field_name.to_degrees() }
+//     });
+//     quote! {
+//         impl #impl_generics #ident #ty_generics #where_clause {
+//             pub fn to_degrees(self) -> Self { Self { #(#field_initializers_to_degrees,)* } }
+//         }
+//     }
+// };
