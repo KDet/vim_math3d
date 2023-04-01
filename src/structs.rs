@@ -224,13 +224,13 @@ pub struct Triangle2D<T: Float = f32> {
     pub c: Vector2::<T>,
 }
 
-#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq)]
+#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq, UnaryOps)]
 pub struct Vector2<T: Float> {
     pub x: T,
     pub y: T,
 }
 
-#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq)]
+#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq, UnaryOps)]
 pub struct Vector3<T: Float> {
     pub x: T,
     pub y: T,
