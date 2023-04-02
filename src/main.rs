@@ -14,11 +14,12 @@ fn main() {
     println!("Hello, hash_code! {:?}", math3d_ops::cube(2)); 
 
     let a3 = a1.set_max(Vector3::new(10.0, 20.0, 30.0));
-    let v4 = Vector4::new(10.0, 20.0, 30.0, 40.0);
+    let v4 = Vector4::new(1.0, 2.0, 3.0, 10.0);
+    let v5 = Vector4::new(1.0, 2.0, 3.0, 10.0);
 
-    println!("Hello, v4 inverse! {:?}", v4.inverse().cube().inverse()); 
+    println!("Hello, v4 inverse! {:?}", v4.dot(&v5)); 
     println!("Hello, eq2! {:?}", a3 == a2);
-    println!("Hello, float! {:?}", 2i32.min(5));
+    println!("Hello, float! {:?}", 0.0);
 
     println!("Hello, zero! {:?}", AABox::<f32>::zero());
     //println!("Hello, one! {:?}", mo);

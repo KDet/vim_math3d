@@ -56,46 +56,37 @@ pub fn derive_math_struct(input: TokenStream) -> TokenStream {
     let field_setters = fields.iter().map(|field| {
         let field_name = &field.ident;
         let setter_name = format_ident!("set_{}", field_name.as_ref().unwrap());
+        let unit_name = format_ident!("unit_{}", field_name.as_ref().unwrap());
         let field_type = &field.ty;
-        let other_fields = fields.iter().filter(|f| f.ident != *field_name).map(|f| &f.ident);
+        let setters_other_fields = fields.iter().filter(|f| f.ident != *field_name).map(|f| &f.ident);
+        let units_other_fields = fields.iter().filter(|f| f.ident != *field_name).map(|f| &f.ident );
+        let units_other_types = fields.iter().filter(|f| f.ident != *field_name).map(|f| &f.ty );
+
         quote! {
             pub fn #setter_name(self, value: #field_type) -> Self {
                 Self {
                     #field_name: value,
-                    #( #other_fields: self.#other_fields ),*
+                    #( #setters_other_fields: self.#setters_other_fields ),*
+                }
+            }
+            pub fn #unit_name() -> Self {
+                Self {
+                    #field_name: #field_type::one(),
+                    #( #units_other_fields: #units_other_types::zero() ),*
                 }
             }
         }
     });
-    
+
     let expanded = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            pub fn new(#(#field_name_types),*) -> Self { 
-                Self { 
-                    #(#field_names),*
-                } 
-            }
+            pub fn new(#(#field_name_types),*) -> Self { Self { #(#field_names),* } }
 
-            pub fn zero() -> Self {
-                Self {
-                    #(#field_initializers_zero,)*
-                }
-            }
-            pub fn one() -> Self {
-                Self {
-                    #(#field_initializers_one,)*
-                }
-            }
-            pub fn min_value() -> Self {
-                Self {
-                    #(#field_initializers_min,)*
-                }
-            }
-            pub fn max_value() -> Self {
-                Self {
-                    #(#field_initializers_max,)*
-                }
-            }
+            pub fn zero() -> Self { Self { #(#field_initializers_zero,)* } }
+            pub fn one() -> Self { Self { #(#field_initializers_one,)* } }
+            pub fn min_value() -> Self { Self { #(#field_initializers_min,)* } }
+            pub fn max_value() -> Self { Self { #(#field_initializers_max,)* } }
+
             #(#field_setters)*
         }
     };
@@ -497,28 +488,205 @@ pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
         },
         _ => panic!("UnaryOps can only be derived for structs"),
     };
-    let count = fields.iter().count();
-
+    let field_names = fields.iter()
+        .map(|field| &field.ident)
+        .map(|ident| quote! { #ident })
+        .collect::<Vec<_>>();
+    let count = fields.len();
     let field_type = &fields[0].ty;
+
     let field_names_value = fields.iter().map(|field| {
         let field_name = &field.ident;
         quote! { #field_name : value }
     });
+    let field_initializers_sub = fields.iter().map(|field| {
+        let field_name = &field.ident;
+        quote! { #field_name: self.#field_name - self.#field_name }
+    });
+
+    let (first_field, other_fields) = field_names.split_first().expect("Expected at least one field");
+
+
+//  static <#= v #> ClampLower(this <#= v #> v, <#= v #> min) => v.Max(min);
+//  static <#= v #> ClampUpper(this <#= v #> v, <#= v #> max) => v.Min(max);
+//  static <#= v #> Clamp(this <#= v #> v, <#= v #> min, <#= v #> max) => v.Min(max).Max(min);
+//  static <#= v #> Average(this <#= v #> v1, <#= v #> v2) => v1.Lerp(v2, 0.5f);
+//  static <#= v #> Barycentric(this <#= v #> v1, <#= v #> v2, <#= v #> v3, float u, float v) => v1 + (v2 - v1) * u + (v3 - v1) * v
+
 
     let expanded = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
             pub const NUM_COMPONENTS: usize = #count;
 
-            pub fn from_value(value: #field_type) -> Self { 
-                Self { 
-                    #(#field_names_value),*
-                } 
+            pub fn from_value(value: #field_type) -> Self { Self { #(#field_names_value),* } }
+            pub fn dot(&self, other: &Self) -> #field_type { (self.#first_field * other.#first_field) #(+(self.#other_fields * other.#other_fields))* }
+            pub fn any_component_negative(&self) -> bool { self.min_component() < #field_type::zero() }
+            pub fn min_component(&self) -> #field_type { self.#first_field #(.min(self.#other_fields))* }
+            pub fn max_component(&self) -> #field_type { self.#first_field #(.max(self.#other_fields))* }
+            pub fn sum_components(&self) -> #field_type { self.#first_field #(+self.#other_fields)* }
+            pub fn sum_sqr_components(&self) -> #field_type { (self.#first_field * self.#first_field) #(+(self.#other_fields * self.#other_fields))* }
+            pub fn product_components(&self) -> #field_type { self.#first_field #(*self.#other_fields)* }
+            pub fn get_component(&self, index: usize) -> Option<#field_type> {
+                if index < 0 || index > #count { return None } else { Some([#(self.#field_names),*][index]) }
             }
+            pub fn magnitude_squared(&self) -> #field_type { self.sum_sqr_components() }
+            pub fn magnitude(&self) -> #field_type { self.sum_sqr_components().sqrt() }
 
+            pub fn is_nan(&self) -> bool { self.#first_field.is_nan() #(|| self.#other_fields.is_nan())* }
+            pub fn is_infinite(&self) -> bool { self.#first_field.is_infinite() #(|| self.#other_fields.is_infinite())* }
+
+            pub fn lerp(self, other: &Self, t: #field_type) -> Self { 
+                Self { #(#field_names: self.#field_names + (other.#field_names - self.#field_names) * t),* } 
+            }
+            pub fn inverse_lerp(self, a: &Self, b: &Self) -> Self { 
+                Self { #(#field_names: (self.#field_names - a.#field_names) / (b.#field_names - a.#field_names)),* } 
+            }
+            pub fn lerp_precise(self, other: &Self, t: #field_type) -> Self {
+                Self { #(#field_names: ((#field_type::one() - t) * self.#field_names) + (other.#field_names * t) ),* } 
+            }
+            //pub fn clamp_lower(self, min: &Self, t: #field_type) -> Self { self.max(*min) }
+        }
+
+        impl #impl_generics PartialOrd for #ident #ty_generics #where_clause {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                self.magnitude_squared().partial_cmp(&other.magnitude_squared())
+            }
+        }
+
+        impl #impl_generics Add for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn add(self, other: Self) -> Self::Output {
+                Self { #(#field_names: self.#field_names + other.#field_names),* }
+            }
+        }
+        impl #impl_generics Add<#field_type> for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn add(self, other: #field_type) -> Self::Output {
+                Self { #(#field_names: self.#field_names + other),* }
+            }
+        }
+
+        impl #impl_generics Sub for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn sub(self, other: Self) -> Self::Output {
+                Self { #(#field_names: self.#field_names - other.#field_names),* }
+            }
+        }
+        impl #impl_generics Sub<#field_type> for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn sub(self, other: #field_type) -> Self::Output {
+                Self { #(#field_names: self.#field_names - other),* }
+            }
+        }
+
+        impl #impl_generics Mul for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn mul(self, other: Self) -> Self::Output {
+                Self { #(#field_names: self.#field_names * other.#field_names),* }
+            }
+        }
+        impl #impl_generics Mul<#field_type> for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn mul(self, other: #field_type) -> Self::Output {
+                Self { #(#field_names: self.#field_names * other),* }
+            }
+        }
+
+        impl #impl_generics Div for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn div(self, other: Self) -> Self::Output {
+                Self { #(#field_names: self.#field_names / other.#field_names),* }
+            }
+        }
+        impl #impl_generics Div<#field_type> for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn div(self, other: #field_type) -> Self::Output {
+                Self { #(#field_names: self.#field_names / other),* }
+            }
+        }
+
+        impl #impl_generics Neg for #ident #ty_generics #where_clause {
+            type Output = Self;
+            fn neg(self) -> Self::Output { Self::zero() - self }
         }
     };
 
     eprintln!("expanded code:\n{}", expanded);
     TokenStream::from(expanded)
+}
 
+
+
+#[proc_macro_derive(IntervalOps)]
+pub fn derive_math_interval_ops(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let ident = input.ident;
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    
+    let fields = match input.data {
+        Data::Struct(data) => match data.fields {
+            Fields::Named(named_fields) => named_fields.named,
+            _ => panic!("UnaryOps can only be derived for structs with named fields"),
+        },
+        _ => panic!("UnaryOps can only be derived for structs"),
+    };
+    let field_names = fields.iter()
+        .map(|field| &field.ident)
+        .map(|ident| quote! { #ident })
+        .collect::<Vec<_>>();
+    let field_type = &fields[0].ty;
+
+    let expanded = quote! {
+        impl #impl_generics #ident #ty_generics #where_clause {
+            pub fn is_nan(&self) -> bool { #(self.#field_names.is_nan())||* }
+            pub fn is_infinite(&self) -> bool { #(self.#field_names.is_infinite())||* }
+            pub fn extent(&self) -> #field_type { self.max - self.min }
+
+            // public <#= type #> Extent => (Max - Min);
+            // public <#= type #> Center => Min.Average(Max);   
+            //  double MagnitudeSquared() => Extent.MagnitudeSquared();
+            //  double Magnitude() => MagnitudeSquared().Sqrt();        
+            //  <#= name #> Merge(<#= name #> other) => new <#= name #>(Min.Min(other.Min), Max.Max(other.Max));
+            //  <#= name #> Intersection(<#= name #> other) => new <#= name #>(Min.Max(other.Min), Max.Min(other.Max));
+            //  static <#= name #> operator + (<#= name #> value1, <#= name #> value2) => value1.Merge(value2);
+            //  static <#= name #> operator - (<#= name #> value1, <#= name #> value2) => value1.Intersection(value2);
+            //  <#= name #> Merge(<#= type #> other) => new <#= name #>(Min.Min(other), Max.Max(other));
+            //  static <#= name #> operator + (<#= name #> value1, <#= type #> value2) => value1.Merge(value2);
+            // public static <#= name #> Empty = Create(<#= type #>.MaxValue, <#= type #>.MinValue);
+
+            // pub fn from_value(value: #field_type) -> Self { Self { #(#field_names_value),* } }
+            // pub fn dot(&self, other: &Self) -> #field_type { (self.#first_field * other.#first_field) #(+(self.#other_fields * other.#other_fields))* }
+            
+            // pub fn min_component(&self) -> #field_type { self.#first_field #(.min(self.#other_fields))* }
+            // pub fn max_component(&self) -> #field_type { self.#first_field #(.max(self.#other_fields))* }
+            // pub fn sum_components(&self) -> #field_type { self.#first_field #(+self.#other_fields)* }
+            // pub fn sum_sqr_components(&self) -> #field_type { (self.#first_field * self.#first_field) #(+(self.#other_fields * self.#other_fields))* }
+            // pub fn product_components(&self) -> #field_type { self.#first_field #(*self.#other_fields)* }
+            // pub fn get_component(&self, index: usize) -> Option<#field_type> {
+            //     if index < 0 || index > #count { return None } else { Some([#(self.#field_names),*][index]) }
+            // }
+            // pub fn magnitude_squared(&self) -> #field_type { self.sum_sqr_components() }
+            // pub fn magnitude(&self) -> #field_type { self.sum_sqr_components().sqrt() }
+        }
+
+        impl #impl_generics PartialOrd for #ident #ty_generics #where_clause {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                self.magnitude_squared().partial_cmp(&other.magnitude_squared())
+            }
+        }
+
+        // impl #impl_generics Sub for #ident #ty_generics #where_clause {
+        //     type Output = Self;
+        //     fn sub(self, other: Self) -> Self::Output { { Self { #(#field_initializers_sub,)* } } }
+        // }
+
+        // impl #impl_generics Neg for #ident #ty_generics #where_clause {
+        //     type Output = Self;
+        //     fn neg(self) -> Self::Output { Self::zero() - self }
+        // }
+    };
+
+    eprintln!("expanded code:\n{}", expanded);
+    TokenStream::from(expanded)
 }

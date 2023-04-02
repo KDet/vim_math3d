@@ -1,5 +1,5 @@
 use num_traits::{Float, PrimInt};
-use std::ops::{BitOr, BitXor, Add, Sub, Mul, Div, Neg, Not, BitAnd, Rem};
+use std::ops::{BitOr, BitXor, Add, Sub, Mul, Div, Neg, Not, BitAnd};
 
 pub fn abs<T: Float>(value: T) -> T { T::abs(value) }
 pub fn acos<T: Float>(value: T) -> T { T::acos(value) }
