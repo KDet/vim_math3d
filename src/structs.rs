@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 use num_traits::{Float, Zero, One };
 
-use vim_math3d_macro_derive::{Struct, AlmostEq, FromTuple, FloatHash, UnaryOps};
+use vim_math3d_macro_derive::{Struct, AlmostEq, FromTuple, FloatHash, UnaryOps, VectorOps};
 
 #[derive(Debug, PartialEq, Struct, FromTuple, FloatHash)]
 pub struct AABox<T: Float = f32> {
@@ -237,7 +237,7 @@ pub struct Vector3<T: Float> {
     pub z: T,
 }
 
-#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq, UnaryOps)]
+#[derive(Debug, PartialEq, Struct, FromTuple, FloatHash, AlmostEq, UnaryOps, VectorOps)]
 pub struct Vector4<T: Float> {
     pub x: T,
     pub y: T,

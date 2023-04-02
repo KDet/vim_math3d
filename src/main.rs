@@ -10,7 +10,7 @@ fn main() {
     a2.hash(&mut hasher);
     let hash_code = hasher.finish();
  
-    println!("Hello, eq! {:?}", !math3d_ops::bitnadd(true, false));
+    println!("Hello, eq! {:?}", !math3d_ops::and(true, false));
     println!("Hello, hash_code! {:?}", math3d_ops::cube(2)); 
 
     let a3 = a1.set_max(Vector3::new(10.0, 20.0, 30.0));

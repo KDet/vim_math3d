@@ -18,7 +18,7 @@ pub fn derive_math_struct(input: TokenStream) -> TokenStream {
         _ => panic!("Struct can only be derived for structs"),
     };
 
-    let count = fields.iter().count();
+    
     let field_name_types = fields.iter().map(|field| {
         let field_name = &field.ident;
         let field_type = &field.ty;
@@ -70,8 +70,6 @@ pub fn derive_math_struct(input: TokenStream) -> TokenStream {
     
     let expanded = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            pub const NUM_COMPONENTS: usize = #count;
-
             pub fn new(#(#field_name_types),*) -> Self { 
                 Self { 
                     #(#field_names),*
@@ -481,6 +479,46 @@ pub fn derive_math_unary_ops(input: TokenStream) -> TokenStream {
         }
     };
 
+    //eprintln!("expanded code:\n{}", expanded);
+    TokenStream::from(expanded)
+}
+
+#[proc_macro_derive(VectorOps)]
+pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let ident = input.ident;
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    
+    let fields = match input.data {
+        Data::Struct(data) => match data.fields {
+            Fields::Named(named_fields) => named_fields.named,
+            _ => panic!("UnaryOps can only be derived for structs with named fields"),
+        },
+        _ => panic!("UnaryOps can only be derived for structs"),
+    };
+    let count = fields.iter().count();
+
+    let field_type = &fields[0].ty;
+    let field_names_value = fields.iter().map(|field| {
+        let field_name = &field.ident;
+        quote! { #field_name : value }
+    });
+
+    let expanded = quote! {
+        impl #impl_generics #ident #ty_generics #where_clause {
+            pub const NUM_COMPONENTS: usize = #count;
+
+            pub fn from_value(value: #field_type) -> Self { 
+                Self { 
+                    #(#field_names_value),*
+                } 
+            }
+
+        }
+    };
+
     eprintln!("expanded code:\n{}", expanded);
     TokenStream::from(expanded)
+
 }
