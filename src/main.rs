@@ -1,3 +1,4 @@
+use num_traits::Float;
 pub use vim_math3d::*;
 use std::{hash::{Hash, Hasher}, collections::hash_map::DefaultHasher};
 //use num_traits::{Zero, One};
@@ -9,9 +10,9 @@ fn main() {
     a1.hash(&mut hasher);
     a2.hash(&mut hasher);
     let hash_code = hasher.finish();
- 
+    let f = f64::from(0.5);
     println!("Hello, eq! {:?}", !math3d_ops::and(true, false));
-    println!("Hello, hash_code! {:?}", math3d_ops::cube(2)); 
+    println!("Hello, hash_code! {:?}", f); 
 
     let a3 = a1.set_max(Vector3::new(10.0, 20.0, 30.0));
     let v4 = Vector4::new(1.0, 2.0, 3.0, 10.0);
