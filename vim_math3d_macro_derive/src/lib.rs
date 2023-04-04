@@ -261,7 +261,7 @@ pub fn derive_math_vector_struct_ops(input: TokenStream) -> TokenStream {
         impl #impl_generics #ident #ty_generics #where_clause {
             pub const NUM_COMPONENTS: usize = #count;
 
-            pub fn from_value(value: #type_param) -> Self { Self { #(#field_names : value),* } }
+            pub fn create_from_value(value: #type_param) -> Self { Self { #(#field_names : value),* } }
 
             pub fn any_component_negative(&self) -> bool { self.min_component() < #type_param::zero() }
             pub fn min_component(&self) -> #type_param { self.#first_field #(.min(self.#other_fields))* }
@@ -347,14 +347,14 @@ pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            pub fn lerp(self, other: &Self, t: #field_type) -> Self { Self { #(#field_names: self.#field_names + (other.#field_names - self.#field_names) * t),* } }
-            pub fn inverse_lerp(self, a: &Self, b: &Self) -> Self { Self { #(#field_names: (self.#field_names - a.#field_names) / (b.#field_names - a.#field_names)),* } }
-            pub fn lerp_precise(self, other: &Self, t: #field_type) -> Self { Self { #(#field_names: ((#field_type::one() - t) * self.#field_names) + (other.#field_names * t) ),* } }
+            pub fn lerp(self, other: Self, t: #field_type) -> Self { Self { #(#field_names: self.#field_names + (other.#field_names - self.#field_names) * t),* } }
+            pub fn inverse_lerp(self, a: Self, b: Self) -> Self { Self { #(#field_names: (self.#field_names - a.#field_names) / (b.#field_names - a.#field_names)),* } }
+            pub fn lerp_precise(self, other: Self, t: #field_type) -> Self { Self { #(#field_names: ((#field_type::one() - t) * self.#field_names) + (other.#field_names * t) ),* } }
             pub fn clamp_lower(self, min: Self) -> Self { self.max(min) }
             pub fn clamp_upper(self, max: Self) -> Self { self.min(max) }
             pub fn clamp(self, min: Self, max: Self) -> Self { self.min(max).max(min) }
-            pub fn average(self, other: &Self) -> Self { self.lerp(other, #field_type::from(0.5).unwrap()) }          
-            pub fn barycentric(self, v2: &Self, v3: &Self, u: #field_type, v: #field_type) -> Self {
+            pub fn average(self, other: Self) -> Self { self.lerp(other, #field_type::from(0.5).unwrap()) }          
+            pub fn barycentric(self, v2: Self, v3: Self, u: #field_type, v: #field_type) -> Self {
                 let v2_sub_self = Self { #(#field_names: v2.#field_names - self.#field_names),* };
                 let v3_sub_self = Self { #(#field_names: v3.#field_names - self.#field_names),* };
                 self + v2_sub_self * u + v3_sub_self * v
@@ -385,14 +385,8 @@ pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
             pub fn to_radians(self) -> Self { Self { #(#field_names: self.#field_names.to_radians()),* } }
             pub fn to_degrees(self) -> Self { Self { #(#field_names: self.#field_names.to_degrees()),* } }
 
-            pub fn distance_squared(&self, other: &Self) -> #field_type { 
-                let sub = Self { #(#field_names: self.#field_names - other.#field_names),* };
-                sub.length_squared() 
-            }
-            pub fn distance(&self, other: &Self) -> #field_type { 
-                let sub = Self { #(#field_names: self.#field_names - other.#field_names),* };
-                sub.length() 
-            }
+            pub fn distance_squared(self, other: Self) -> #field_type { (self - other).length_squared() }
+            pub fn distance(self, other: Self) -> #field_type { (self - other).length() } 
             pub fn length_squared(&self) -> #field_type { self.sum_sqr_components() }
             pub fn length(&self) -> #field_type { self.length_squared().sqrt() }
             pub fn normalize(self) -> Self { 
@@ -501,6 +495,7 @@ pub fn derive_math_interval_ops(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
             pub fn empty() -> Self { Self { #first_field: #field_type::max_value(), #(#other_fields: #field_type::min_value()),* } }
+            
             pub fn extent(&self) -> #field_type { #(self.#field_names)-* } 
             #center
             #magnitude_squared
@@ -508,6 +503,8 @@ pub fn derive_math_interval_ops(input: TokenStream) -> TokenStream {
             pub fn merge(self, other: Self) -> Self { Self { #(#field_names: self.#field_names.min( (other.#field_names) )),* } }
             pub fn merge_value(self, other: #field_type) -> Self { Self { #(#field_names: self.#field_names.min(other)),* } }
             pub fn intersection(self, other: Self) -> Self { Self { #(#field_names: self.#field_names.max(other.#field_names)),* } }
+
+            pub fn get_component(&self, index: usize) -> Option<#field_type> { if index < 0 || index > #count { return None } else { Some([#(self.#field_names),*][index]) } }
         }
 
         impl #impl_generics PartialOrd for #ident #ty_generics #where_clause {

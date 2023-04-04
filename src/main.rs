@@ -22,7 +22,7 @@ fn main() {
     println!("Hello, eq2! {:?}", a3 == a2);
     println!("Hello, float! {:?}", Vector4 :: < f64 > :: max_value());
 
-    println!("Hello, zero! {:?}", 1.0.min(2.0));
+    println!("Hello, zero! {:?}", AABox::<f64>::empty());
     //println!("Hello, one! {:?}", mo);
     // Create a Vector3<f32> from a tuple of f32 values
     let vector: Vector3<f32> = (1.0, 2.0, 3.0).into();
