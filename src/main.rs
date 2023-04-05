@@ -26,7 +26,7 @@ fn main() {
     //println!("Hello, one! {:?}", mo);
     // Create a Vector3<f32> from a tuple of f32 values
     let vector: Vector3<f32> = (1.0, 2.0, 3.0).into();
-    println!("vector = {:?}", vector);
+    println!("to_nearest_pow_of_2 = {:?}", math3d_ops::to_nearest_pow_of_2(2i32));
 
     // Convert a Vector3<f32> back into a tuple of f32 values
     let tuple: (f32, f32, f32) = vector.into();

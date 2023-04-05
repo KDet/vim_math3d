@@ -1,5 +1,5 @@
-use num_traits::{Float, PrimInt};
-use std::ops::{BitOr, BitXor, Add, Sub, Mul, Div, Neg, Not, BitAnd};
+use num_traits::{Float, PrimInt, FloatConst};
+use std::ops::{BitOr, BitXor, Add, Sub, Mul, Div, Neg, Not, BitAnd, AddAssign, SubAssign};
 
 pub fn abs<T: Float>(value: T) -> T { T::abs(value) }
 pub fn acos<T: Float>(value: T) -> T { T::acos(value) }
@@ -78,3 +78,98 @@ pub fn clamp_upper<T: Float>(v: T, max: T) -> T { v.min(max) }
 pub fn clamp<T: Float>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
 pub fn average<T: Float>(v1: T, v2: T) -> T { lerp(v1, v2, T::from(0.5f32).unwrap() ) }
 pub fn barycentric<T: Float>(v1: T, v2: T, v3: T, u: T, v: T) -> T { v1 + (v2 - v1) * u + (v3 - v1) * v }
+
+/// Expresses two values as a ratio
+#[inline(always)]
+pub fn percentage<T: Float>(denominator: T, numerator: T) -> T {
+    (numerator / denominator) * T::from(100.0).unwrap()
+}
+
+/// Calculate the nearest power of 2 from the input number
+#[inline(always)]
+pub fn to_nearest_pow_of_2(x: i32) -> i32 {
+    (2.0_f64.powf((x as f64).log2().round())) as i32
+}
+
+/// Performs a Catmull-Rom interpolation using the specified positions.
+pub fn catmull_rom<T: Float>(value1: T, value2: T, value3: T, value4: T, amount: T) -> T {
+    // Using formula from http://www.mvps.org/directx/articles/catmull/
+    // Internally using doubles not to lose precision
+    let amount_squared = amount * amount;
+    let amount_cubed = amount_squared * amount;
+    let half = T::from(0.5).unwrap();
+    let two = T::from(2.0).unwrap();
+    let three = T::from(3.0).unwrap();
+    let four = T::from(4.0).unwrap();
+    let five = T::from(5.0).unwrap();
+
+    half  * (two * value2 +
+        (value3 - value1) * amount +
+        (two * value1 - five * value2 + four * value3 - value4) * amount_squared +
+        (three * value2 - value1 - three * value3 + value4) * amount_cubed)
+}
+
+/// Performs a Hermite spline interpolation.
+pub fn hermite<T: Float>(value1: T, tangent1: T, value2: T, tangent2: T, amount: T) -> T {
+    // All transformed to double not to lose precision
+    // Otherwise, for high numbers of param:amount the result is NaN instead of Infinity
+    let two = T::from(2.0).unwrap();
+    let three = T::from(3.0).unwrap();
+    let s_cubed = amount * amount * amount;
+    let s_squared = amount * amount;
+
+    let result = if amount == T::zero() {
+        value1
+    } else if amount == T::one() {
+        value2
+    } else {
+        (two * value1 - two * value2 + tangent2 + tangent1) * s_cubed +
+        (three * value2 - three * value1 - two * tangent1 - tangent2) * s_squared +
+        tangent1 * amount +
+        value1
+    };
+    result
+}
+
+/// Interpolates between two values using a cubic equation (Hermite),
+/// clamping the amount to 0 to 1
+#[inline(always)] 
+pub fn smooth_step<T: Float>(value1: T, value2: T, amount: T) -> T {
+    hermite(value1, T::zero(), value2, T::zero(), amount.min(T::one()).max(T::zero()))
+}
+
+/// Reduces a given angle to a value between π and -π.
+///
+/// # Arguments
+///
+/// * `angle` - The angle to reduce, in radians.
+///
+/// # Returns
+///
+/// The new angle, in radians.
+pub fn wrap_angle<T: Float + FloatConst + AddAssign + SubAssign>(angle: T) -> T {
+    let two_pi = T::from(2.0).unwrap() *T::PI();
+    if angle > -T::PI() && angle <= T::PI() { return angle; }
+    let mut new_angle = angle % two_pi;
+    if new_angle <= -T::PI() {
+        new_angle += two_pi;
+    } else if new_angle > T::PI() {
+        new_angle -= two_pi;
+    }
+    new_angle
+}
+
+/// Determines whether the given float is non-zero and valid.
+///
+/// # Arguments
+///
+/// * `self` - The float to check.
+/// * `tolerance` - The tolerance level to use for checking.
+///
+/// # Returns
+///
+/// `true` if the float is non-zero and valid, `false` otherwise.
+#[inline(always)]
+pub fn is_non_zero_and_valid<T: Float>(value: T, tolerance: T) -> bool {
+    !value.is_infinite() && !value.is_nan() && value.abs() > tolerance
+}
