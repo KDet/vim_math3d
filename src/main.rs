@@ -1,4 +1,3 @@
-use num_traits::{Float, ToPrimitive};
 pub use vim_math3d::*;
 use std::{hash::{Hash, Hasher}, collections::hash_map::DefaultHasher};
 //use num_traits::{Zero, One};
@@ -19,7 +18,7 @@ fn main() {
     let v5 = Vector4::new(1.0, 2.0, 3.0, 10.0);
 
    // println!("Hello, v4 inverse! {:?}", v4.dot(&v5)); 
-    println!("Hello, eq2! {:?}", a3 == a2);
+    println!("Hello, eq2! {:?}", f32::EPSILON);
     println!("Hello, float! {:?}", Vector4 :: < f64 > :: max_value());
 
     println!("Hello, zero! {:?}", AABox::<f64>::empty());

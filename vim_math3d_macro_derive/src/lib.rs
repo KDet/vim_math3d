@@ -273,7 +273,7 @@ pub fn derive_math_vector_struct_ops(input: TokenStream) -> TokenStream {
             pub fn magnitude(&self) -> f64 { self.magnitude_squared().sqrt() }
             
             #magnitude_squared
-            pub fn dot(&self, other: &Self) -> #type_param { #(self.#field_names * other.#field_names)+* }
+            pub fn dot(&self, other: Self) -> #type_param { #(self.#field_names * other.#field_names)+* }
         }
 
         impl #impl_generics Neg for #ident #ty_generics #where_clause {
