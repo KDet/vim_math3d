@@ -4,7 +4,7 @@ use num_traits::{Float, Zero, One };
 use std::hash::Hash;
 
 use vim_math3d_macro_derive::{StructOps, VectorOps, IntervalOps,  VectorStructOps};
-use crate::traits::{Transformable3D, Points, Mappable, Points2D};
+use crate::transformable::{Transformable3D, Points, Mappable, Points2D};
 use crate::{math3d_ops, constants};
 
 #[derive(Debug, Clone, Copy, PartialEq, StructOps, IntervalOps)]
@@ -369,12 +369,12 @@ impl<T: Float> Vector4<T> {
     pub fn from_vector2(v: Vector2<T>) -> Self { Self::new(v.x, v.y, T::zero(), T::zero()) }
 }
 
-impl<T: Float> Transformable3D<T> for Vector4<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Vector4<T> {
+    type Output = Self;
 
     #[inline(always)]
-    fn transform(self, matrix: &Matrix4x4<T>) -> Self::SelfType {
-        Self::SelfType {
+    fn transform(&self, matrix: Matrix4x4<T>) -> Self::Output {
+        Self::Output {
             x: self.x * matrix.m11 + self.y * matrix.m21 + self.z * matrix.m31 + self.w * matrix.m41,
             y: self.x * matrix.m12 + self.y * matrix.m22 + self.z * matrix.m32 + self.w * matrix.m42,
             z: self.x * matrix.m13 + self.y * matrix.m23 + self.z * matrix.m33 + self.w * matrix.m43,
@@ -439,7 +439,7 @@ impl<T: Float + Ord> Vector3<T> {
     pub fn to_vector4(&self) -> Vector4<T> { Vector4::<T>::new(self.x, self.y, self.z, T::zero()) }
     pub fn from_num(v: T) -> Self { Self::new(v, v, v) }
 
-    pub fn rotate(&self, axis: Self, angle: T) -> Self { self.transform(&Matrix4x4::create_from_axis_angle(axis, angle)) }
+    pub fn rotate(&self, axis: Self, angle: T) -> Self { self.transform(Matrix4x4::create_from_axis_angle(axis, angle)) }
     pub fn is_non_zero_and_valid(&self) -> bool {
         let length_squared = self.length_squared();
         !length_squared.is_infinite() && !length_squared.is_nan() && length_squared.abs() > constants::tolerance()
@@ -558,12 +558,12 @@ impl<T: Float + Ord> Vector3<T> {
    
 }
 
-impl<T: Float> Transformable3D<T> for Vector3<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Vector3<T> {
+    type Output = Self;
 
     /// Transforms a vector by the given matrix.
-    fn transform(self, matrix: &Matrix4x4<T>) -> Self::SelfType {
-        Self::SelfType {
+    fn transform(&self, matrix: Matrix4x4<T>) -> Self::Output {
+        Self::Output {
             x: self.x * matrix.m11 + self.y * matrix.m21 + self.z * matrix.m31, 
             y: self.x * matrix.m12 + self.y * matrix.m22 + self.z * matrix.m32, 
             z: self.x * matrix.m13 + self.y * matrix.m23 + self.z * matrix.m33,
@@ -602,11 +602,11 @@ impl<T: Float> Points<T> for Line<T> {
     fn get_point(&self, n: usize) -> Vector3<T> { if n == 0 { self.a } else { self.b } }
 }
 
-impl<T: Float> Transformable3D<T> for Line<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Line<T> {
+    type Output = Self;
 
     #[inline(always)]
-    fn transform(self, mat: &Matrix4x4<T>) -> Self {
+    fn transform(&self, mat: Matrix4x4<T>) -> Self {
         Self { a: self.a.transform(mat), b: self.b.transform(mat) }
     }
 }
@@ -699,10 +699,10 @@ impl<T: Float> Vector2<T> {
     
 }
 
-impl<T: Float + AddAssign> Transformable3D<T> for Vector2<T> {
-    type SelfType = Self;
+impl<T: Float + AddAssign + Ord> Transformable3D<T> for Vector2<T> {
+    type Output = Self;
     /// Transforms the box by a 4x4 matrix.
-    fn transform(self, matrix: &Matrix4x4<T>) -> Self {
+    fn transform(&self, matrix: Matrix4x4<T>) -> Self {
         Self::new(
             self.x * matrix.m11 + self.y * matrix.m21 + matrix.m41,
             self.x * matrix.m12 + self.y * matrix.m22 + matrix.m42,
@@ -1108,10 +1108,10 @@ impl<T: Float + AddAssign> AABox<T> {
     }
 }
 
-impl<T: Float + AddAssign> Transformable3D<T> for AABox<T> {
-    type SelfType = Self;
+impl<T: Float + AddAssign + Ord> Transformable3D<T> for AABox<T> {
+    type Output = Self;
     /// Transforms the box by a 4x4 matrix.
-    fn transform(self, mat: &Matrix4x4<T>) -> Self {
+    fn transform(&self, mat: Matrix4x4<T>) -> Self {
         AABox::<T>::new_from_points(&self.corners().map(|v| v.transform(mat)))
     }
 }
@@ -1693,11 +1693,11 @@ impl<T: Float + Ord> Plane<T> {
 }
 
 impl<T: Float + Ord> Transformable3D<T> for Plane<T> {
-    type SelfType = Self;
+    type Output = Self;
 
     /// Transforms a vector by the given matrix.
     #[inline(always)]
-    fn transform(self, matrix: &Matrix4x4<T>) -> Self::SelfType {
+    fn transform(&self, matrix: Matrix4x4<T>) -> Self::Output {
         let m = matrix.inverse();
         let x = self.normal.x;
         let y = self.normal.y;
@@ -1713,11 +1713,11 @@ impl<T: Float + Ord> Transformable3D<T> for Plane<T> {
     }
 }
 
-impl<T: Float> Transformable3D<T> for Quad<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Quad<T> {
+    type Output = Self;
 
-    fn transform(self, mat: &Matrix4x4<T>) -> Self::SelfType {
-        self.map(|x| x.transform(&mat))
+    fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
+        self.map(|x| x.transform(mat))
     }
 }
 
@@ -1932,13 +1932,16 @@ impl<T: Float + AddAssign<T> + Ord> Sphere<T> {
 
 }
 
-impl<T: Float> Transformable3D<T> for Sphere<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Sphere<T> {
+    type Output = Self;
 
-    fn transform(self, mat: &Matrix4x4<T>) -> Self::SelfType {
+    fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
         Self {
             center: self.center.transform(mat),
-            radius: self.radius * ((mat.m11 * mat.m11 + mat.m12 * mat.m12 + mat.m13 * mat.m13).max((mat.m21 * mat.m21 + mat.m22 * mat.m22 + mat.m23 * mat.m23).max(mat.m31 * mat.m31 + mat.m32 * mat.m32 + mat.m33 * mat.m33))).sqrt(),
+            radius: self.radius * <T as Float>::max(<T as Float>::max(
+                mat.m11 * mat.m11 + mat.m12 * mat.m12 + mat.m13 * mat.m13, 
+                mat.m21 * mat.m21 + mat.m22 * mat.m22 + mat.m23 * mat.m23), 
+                mat.m31 * mat.m31 + mat.m32 * mat.m32 + mat.m33 * mat.m33).sqrt(),
         }
     }
 }
@@ -2058,11 +2061,11 @@ impl<T: Float + Ord> Ray<T> {
 }
 
 impl<T: Float + Ord> Transformable3D<T> for Ray<T> {
-    type SelfType = Self;
+    type Output = Self;
 
-    fn transform(self, mat: &Matrix4x4<T>) -> Self::SelfType {
+    fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
         Self {
-            position: self.position.transform(&mat),
+            position: self.position.transform(mat),
             direction: self.direction.transform_normal(&mat),
         }
     }
@@ -2108,11 +2111,11 @@ impl<T: Float + AddAssign + Ord> Triangle<T> {
     pub fn ac(&self) -> Line<T> { self.ca().inverse() }
 }
 
-impl<T: Float> Transformable3D<T> for Triangle<T> {
-    type SelfType = Self;
+impl<T: Float + Ord> Transformable3D<T> for Triangle<T> {
+    type Output = Self;
 
-    fn transform(self, mat: &Matrix4x4<T>) -> Self::SelfType {
-        self.map(|x| x.transform(&mat))
+    fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
+        self.map(|x| x.transform(mat))
     }
 }
 
@@ -3396,8 +3399,8 @@ impl<T: Float + Ord> Matrix4x4<T> {
         let mut p0 = Vector4::new(scales_normalised_screen_coordinates.x, scales_normalised_screen_coordinates.y, T::zero(), T::one());
         let mut p1 = Vector4::new(scales_normalised_screen_coordinates.x, scales_normalised_screen_coordinates.y, T::one(), T::one());
 
-        p0 = p0.transform(&inv_projection);
-        p1 = p1.transform(&inv_projection);
+        p0 = p0.transform(inv_projection);
+        p1 = p1.transform(inv_projection);
 
         p0 = p0 / p0.w;
         p1 = p1 / p1.w;
@@ -3409,6 +3412,10 @@ impl<T: Float + Ord> Matrix4x4<T> {
         let mat = self.invert();
         if let Some(m) = mat { return m }
         else { panic!("No inversion of matrix available") }
+    }
+
+    pub fn multiply(matrices: &[Matrix4x4<T>]) -> Matrix4x4<T> {
+        matrices.iter().fold(Matrix4x4::identity(), |m1, m2| m1 * (*m2))
     }
 
 }
