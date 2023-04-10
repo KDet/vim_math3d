@@ -4,6 +4,7 @@ use num_traits::{Float, Zero, One };
 use std::hash::Hash;
 
 use vim_math3d_macro_derive::{StructOps, VectorOps, IntervalOps,  VectorStructOps};
+use crate::traits::{Transformable3D, Points, Mappable, Points2D};
 use crate::{math3d_ops, constants};
 
 #[derive(Debug, Clone, Copy, PartialEq, StructOps, IntervalOps)]
@@ -247,7 +248,7 @@ pub struct Vector4<T: Float> {
     pub w: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, StructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps)]
 pub struct Matrix4x4<T: Float> {    
     /// Value at row 1, column 1 of the matrix.
     pub m11: T,
@@ -299,9 +300,9 @@ pub struct Stats<T> {
     max: T,
     sum: T,
 }
-//PrimInt
 
-#[derive(PartialEq)]
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum ContainmentType {
     // Indicates that there is no overlap between two bounding volumes.
     Disjoint,
@@ -311,7 +312,7 @@ pub enum ContainmentType {
     Intersects,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum PlaneIntersectionType {
     /// There is no intersection, the bounding volume is in the negative half space of the plane.
     Front,
@@ -321,29 +322,7 @@ pub enum PlaneIntersectionType {
     Intersecting
 }
 
-pub trait Transformable3D<T: Float> {
-    type SelfType;
-
-    fn transform(self, mat: &Matrix4x4<T>) -> Self::SelfType;
-}
-
-pub trait Points<T: Float> {
-    fn num_points(&self) -> usize;
-    fn get_point(&self, n: usize) -> Vector3<T>;
-}
-
-pub trait Points2D<T: Float> {
-    fn num_points(&self) -> usize;
-    fn get_point(&self, n: usize) -> Vector2<T>;
-}
-
-pub trait Mappable<TPart> {
-    type Container;
-    
-    fn map<F>(self, f: F) -> Self::Container
-    where
-        F: Fn(TPart) -> TPart;
-}
+//PrimInt
 
 impl ColorRGBA  {
     pub const LIGHT_RED: ColorRGBA = ColorRGBA { r: 255, g: 128, b: 128, a: 255 };
