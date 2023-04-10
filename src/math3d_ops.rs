@@ -1,4 +1,4 @@
-use num_traits::{Float, PrimInt, FloatConst};
+use num_traits::{Float, PrimInt, FloatConst, Num};
 use std::ops::{BitOr, BitXor, Add, Sub, Mul, Div, Neg, Not, BitAnd, AddAssign, SubAssign};
 
 pub fn abs<T: Float>(value: T) -> T { T::abs(value) }
@@ -68,28 +68,19 @@ pub fn div_round_up<T: PrimInt>(a: T, b: T) -> T { a / b + (if a % b > T::zero()
 pub fn is_even<T: PrimInt>(n: T) -> bool { n % T::from(2).unwrap() == T::zero() }
 pub fn is_odd<T: PrimInt>(n: T) -> bool { n % T::from(2).unwrap() == T::one() }
 pub fn is_power_of_two<T: PrimInt>(v: T) -> bool { v > T::zero() && (v & (v - T::one())) == T::zero() }
-//pub fn clamp<T: PrimInt>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
 
-pub fn lerp<T: Float>(v1: T, v2: T, t: T) -> T { v1 + (v2 - v1) * t }
-pub fn inverse_lerp<T: Float>(v: T, a: T, b: T) -> T { (v - a) / (b - a) }
-pub fn lerp_precise<T: Float>(v1: T, v2: T, t: T) -> T { ((T::one() - t) * v1) + (v2 * t) }
-pub fn clamp_lower<T: Float>(v: T, min: T) -> T { v.max(min) }
-pub fn clamp_upper<T: Float>(v: T, max: T) -> T { v.min(max) }
-pub fn clamp<T: Float>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
-pub fn average<T: Float>(v1: T, v2: T) -> T { lerp(v1, v2, T::from(0.5f32).unwrap() ) }
-pub fn barycentric<T: Float>(v1: T, v2: T, v3: T, u: T, v: T) -> T { v1 + (v2 - v1) * u + (v3 - v1) * v }
-
+pub fn lerp<T: Num + Copy>(v1: T, v2: T, t: T) -> T { v1 + (v2 - v1) * t }
+pub fn inverse_lerp<T: Num + Copy>(v: T, a: T, b: T) -> T { (v - a) / (b - a) }
+pub fn lerp_precise<T: Num + Copy>(v1: T, v2: T, t: T) -> T { ((T::one() - t) * v1) + (v2 * t) }
+pub fn clamp_lower<T: Ord>(v: T, min: T) -> T { v.max(min) }
+pub fn clamp_upper<T: Ord>(v: T, max: T) -> T { v.min(max) }
+pub fn clamp<T: Ord>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
+pub fn average<T: Float>(v1: T, v2: T) -> T { lerp(v1, v2, T::from(0.5).unwrap() ) }
+pub fn barycentric<T: Num + Copy>(v1: T, v2: T, v3: T, u: T, v: T) -> T { v1 + (v2 - v1) * u + (v3 - v1) * v }
 /// Expresses two values as a ratio
-pub fn percentage<T: Float>(denominator: T, numerator: T) -> T {
-    (numerator / denominator) * T::from(100).unwrap()
-}
-
+pub fn percentage<T: Float>(denominator: T, numerator: T) -> T { (numerator / denominator) * T::from(100).unwrap() }
 /// Calculate the nearest power of 2 from the input number
-#[inline(always)]
-pub fn to_nearest_pow_of_2(x: i32) -> i32 {
-    (2.0_f64.powf((x as f64).log2().round())) as i32
-}
-
+pub fn to_nearest_pow_of_2<T: PrimInt>(x: T) -> T { T::from(2.0.powf((x.to_f64().unwrap()).log2().round())).unwrap() }
 /// Performs a Catmull-Rom interpolation using the specified positions.
 pub fn catmull_rom<T: Float>(value1: T, value2: T, value3: T, value4: T, amount: T) -> T {
     // Using formula from http://www.mvps.org/directx/articles/catmull/
