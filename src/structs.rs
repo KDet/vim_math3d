@@ -227,20 +227,20 @@ pub struct Triangle2D<T: Float = f32> {
     pub c: Vector2::<T>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
 pub struct Vector2<T: Float> {
     pub x: T,
     pub y: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
 pub struct Vector3<T: Float> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
 pub struct Vector4<T: Float> {
     pub x: T,
     pub y: T,
@@ -293,7 +293,7 @@ pub struct ValueDomain<T: Float + Ord> {
     pub upper: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Stats<T> {
     count: usize,
     min: T,
@@ -3524,3 +3524,5 @@ impl<T: Float> Mul<T> for Matrix4x4<T> {
 //         )
 //     }
 // }
+//use std::iter::Iterator;
+

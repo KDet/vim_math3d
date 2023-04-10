@@ -77,6 +77,7 @@ pub fn clamp_upper<T: Ord>(v: T, max: T) -> T { v.min(max) }
 pub fn clamp<T: Ord>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
 pub fn average<T: Float>(v1: T, v2: T) -> T { lerp(v1, v2, T::from(0.5).unwrap() ) }
 pub fn barycentric<T: Num + Copy>(v1: T, v2: T, v3: T, u: T, v: T) -> T { v1 + (v2 - v1) * u + (v3 - v1) * v }
+
 /// Expresses two values as a ratio
 pub fn percentage<T: Float>(denominator: T, numerator: T) -> T { (numerator / denominator) * T::from(100).unwrap() }
 /// Calculate the nearest power of 2 from the input number
@@ -98,7 +99,6 @@ pub fn catmull_rom<T: Float>(value1: T, value2: T, value3: T, value4: T, amount:
         (two * value1 - five * value2 + four * value3 - value4) * amount_squared +
         (three * value2 - value1 - three * value3 + value4) * amount_cubed)
 }
-
 /// Performs a Hermite spline interpolation.
 pub fn hermite<T: Float>(value1: T, tangent1: T, value2: T, tangent2: T, amount: T) -> T {
     // All transformed to double not to lose precision
@@ -118,13 +118,11 @@ pub fn hermite<T: Float>(value1: T, tangent1: T, value2: T, tangent2: T, amount:
     };
     result
 }
-
 /// Interpolates between two values using a cubic equation (Hermite),
 /// clamping the amount to 0 to 1
 pub fn smooth_step<T: Float>(value1: T, value2: T, amount: T) -> T {
     hermite(value1, T::zero(), value2, T::zero(), amount.min(T::one()).max(T::zero()))
 }
-
 /// Reduces a given angle to a value between π and -π.
 pub fn wrap_angle<T: Float + FloatConst + AddAssign + SubAssign>(angle: T) -> T {
     let two_pi = T::from(2.0).unwrap() * T::PI();
@@ -137,7 +135,6 @@ pub fn wrap_angle<T: Float + FloatConst + AddAssign + SubAssign>(angle: T) -> T 
     }
     new_angle
 }
-
 /// Determines whether the given float is non-zero and valid.
 pub fn is_non_zero_and_valid<T: Float>(value: T, tolerance: T) -> bool {
     !value.is_infinite() && !value.is_nan() && value.abs() > tolerance

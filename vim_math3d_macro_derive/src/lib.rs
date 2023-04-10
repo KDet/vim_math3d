@@ -202,7 +202,6 @@ pub fn derive_math_struct_ops(input: TokenStream) -> TokenStream {
         }
     };
 
-    //eprintln!("expanded code:\n{}", expanded);
     TokenStream::from(expanded)
 }
 
@@ -397,13 +396,45 @@ pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
                 let len = self.length();
                 if len != #field_type::zero() { self / len } else { self }
             }
-           
             pub fn min(self, other: Self) -> Self { Self { #(#field_names: self.#field_names.min(other.#field_names)),* } }
             pub fn max(self, other: Self) -> Self { Self { #(#field_names: self.#field_names.max(other.#field_names)),* } }
             pub fn square_root(self) -> Self { self.sqrt() }
         }
+
+        impl<T: Float + std::cmp::Eq> Ord for #ident #ty_generics #where_clause {
+            fn cmp(&self, other: &Self) -> Ordering { self.partial_cmp(other).unwrap() }
+        }
+        
+        impl #impl_generics Stats<#ident #ty_generics> #where_clause {
+            pub fn average(&self) -> #ident #ty_generics { self.sum / T::from(self.count).unwrap() }
+            pub fn extents(&self) -> #ident #ty_generics { self.max - self.min }
+            pub fn middle(&self) -> #ident #ty_generics { self.extents() / (T::one() + T::one()) + self.min }
+        }
+
+        impl<T: Float + std::default::Default + std::cmp::Ord> Stats<#ident<T>>  {
+            pub fn stats<I: Iterator<Item = #ident<T>>>(iter: I) -> Self {
+                iter.fold(Self::default(), |a, b| {
+                    Self {
+                        count: a.count + 1,
+                        min: a.min.min(b),
+                        max: a.max.max(b),
+                        sum: a.sum + b,
+                    }
+                })
+            }
+        }
+        
+        impl<T: Float + Default + Ord> #ident<T> {
+            pub fn sum_iter<I: Iterator<Item = Self>>(iter: I) -> Self { iter.fold(Self::zero(), |acc, vec| acc + vec) }
+            pub fn average_iter<I: Iterator<Item = Self>>(iter: I) -> Self { Stats::<Self>::stats(iter).average() }
+            pub fn min_iter<I: Iterator<Item = Self>>(iter: I) -> Self { Stats::<Self>::stats(iter).min }
+            pub fn max_iter<I: Iterator<Item = Self>>(iter: I) -> Self { Stats::<Self>::stats(iter).max }
+            pub fn extents_iter<I: Iterator<Item = Self>>(iter: I) -> Self { Stats::<Self>::stats(iter).extents() }
+            pub fn middle_iter<I: Iterator<Item = Self>>(iter: I) -> Self { Stats::<Self>::stats(iter).middle() }
+        }
     };
 
+    eprintln!("expanded code:\n{}", expanded);
     TokenStream::from(expanded)
 }
 
