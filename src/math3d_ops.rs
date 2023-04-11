@@ -41,8 +41,8 @@ pub fn smoothstep<T: Float>(value: T) -> T {
 }
 
 pub fn within<T: PartialOrd<T>>(value: &T, min: &T, max: &T) -> bool { value >= min && value < max }
-pub fn min<T: core::cmp::Ord>(value: T, other: T) -> T { value.min(other) }
-pub fn max<T: core::cmp::Ord>(value: T, other: T) -> T { value.max(other) }
+pub fn min<T: PartialOrd<T>>(value: T, other: T) -> T { if value > other { other } else { value } }
+pub fn max<T: PartialOrd<T>>(value: T, other: T) -> T { if value < other { other } else { value } }
 
 pub fn add<T: Add<Output=T>>(value: T, other: T) -> T { value.add(other) }
 pub fn sub<T: Sub<Output=T>>(value: T, other: T) -> T { value.sub(other) }
@@ -72,9 +72,9 @@ pub fn is_power_of_two<T: PrimInt>(v: T) -> bool { v > T::zero() && (v & (v - T:
 pub fn lerp<T: Num + Copy>(v1: T, v2: T, t: T) -> T { v1 + (v2 - v1) * t }
 pub fn inverse_lerp<T: Num + Copy>(v: T, a: T, b: T) -> T { (v - a) / (b - a) }
 pub fn lerp_precise<T: Num + Copy>(v1: T, v2: T, t: T) -> T { ((T::one() - t) * v1) + (v2 * t) }
-pub fn clamp_lower<T: Ord>(v: T, min: T) -> T { v.max(min) }
-pub fn clamp_upper<T: Ord>(v: T, max: T) -> T { v.min(max) }
-pub fn clamp<T: Ord>(v: T, min: T, max: T) -> T { v.min(max).max(min) }
+pub fn clamp_lower<T: PartialOrd<T>>(v: T, min: T) -> T { crate::math3d_ops::max(v, min) }
+pub fn clamp_upper<T: PartialOrd<T>>(v: T, max: T) -> T { crate::math3d_ops::min(v, max) }
+pub fn clamp<T: PartialOrd<T>>(v: T, min: T, max: T) -> T { crate::math3d_ops::max(crate::math3d_ops::min(v, max), min) }
 pub fn average<T: Float>(v1: T, v2: T) -> T { lerp(v1, v2, T::from(0.5).unwrap() ) }
 pub fn barycentric<T: Num + Copy>(v1: T, v2: T, v3: T, u: T, v: T) -> T { v1 + (v2 - v1) * u + (v3 - v1) * v }
 

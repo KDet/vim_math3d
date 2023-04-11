@@ -19,7 +19,7 @@ pub trait Mappable<TPart> {
         F: Fn(TPart) -> TPart;
 }
 
-pub trait Transformable3D<T: Float + Ord> {
+pub trait Transformable3D<T: Float> {
     type Output: Transformable3D<T, Output = Self::Output>;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output;

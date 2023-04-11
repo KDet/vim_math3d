@@ -434,7 +434,7 @@ pub fn derive_math_vector_ops(input: TokenStream) -> TokenStream {
         }
     };
 
-    eprintln!("expanded code:\n{}", expanded);
+    //eprintln!("expanded code:\n{}", expanded);
     TokenStream::from(expanded)
 }
 

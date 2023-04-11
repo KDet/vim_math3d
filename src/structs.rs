@@ -288,12 +288,12 @@ pub struct Matrix4x4<T: Float> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ValueDomain<T: Float + Ord> {
+pub struct ValueDomain<T: Float + PartialOrd> {
     pub lower: T,
     pub upper: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Stats<T> {
     count: usize,
     min: T,
@@ -369,7 +369,7 @@ impl<T: Float> Vector4<T> {
     pub fn from_vector2(v: Vector2<T>) -> Self { Self::new(v.x, v.y, T::zero(), T::zero()) }
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Vector4<T> {
+impl<T: Float> Transformable3D<T> for Vector4<T> {
     type Output = Self;
 
     #[inline(always)]
@@ -383,7 +383,7 @@ impl<T: Float + Ord> Transformable3D<T> for Vector4<T> {
     }
 }
 
-impl<T: Float + Ord> Vector3<T> {
+impl<T: Float + PartialOrd> Vector3<T> {
     #[inline(always)]
     pub fn from_xy(x: T, y: T) -> Self { Self { x, y, z: T::zero() } }
     #[inline(always)]
@@ -457,7 +457,7 @@ impl<T: Float + Ord> Vector3<T> {
     pub fn angle(&self, v2: Self, tolerance: T) -> T {
         let d = (self.length_squared() * v2.length_squared()).sqrt();
         if d < tolerance { return T::zero(); }
-        (self.dot(v2) / d).clamp(-T::one(), T::one()).acos()
+        math3d_ops::clamp(self.dot(v2) / d, -T::one(), T::one()).acos()
     }
     pub fn colinear(&self, v2: Self, tolerance: Option<T>) -> bool {
         let t = tolerance.unwrap_or(constants::tolerance());
@@ -558,7 +558,7 @@ impl<T: Float + Ord> Vector3<T> {
    
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Vector3<T> {
+impl<T: Float> Transformable3D<T> for Vector3<T> {
     type Output = Self;
 
     /// Transforms a vector by the given matrix.
@@ -602,7 +602,7 @@ impl<T: Float> Points<T> for Line<T> {
     fn get_point(&self, n: usize) -> Vector3<T> { if n == 0 { self.a } else { self.b } }
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Line<T> {
+impl<T: Float> Transformable3D<T> for Line<T> {
     type Output = Self;
 
     #[inline(always)]
@@ -665,7 +665,7 @@ impl<T: Float> Vector2<T> {
         )
     }
     /// Transforms a vector by the given Quaternion rotation value.
-    pub fn transform_quaternion_to_vector4(&self, rotation: Quaternion<T>) -> Vector4<T> {
+    pub fn transform_to_vector4_quaternion(&self, rotation: Quaternion<T>) -> Vector4<T> {
         let x2 = rotation.x + rotation.x;
         let y2 = rotation.y + rotation.y;
         let z2 = rotation.z + rotation.z;
@@ -699,7 +699,7 @@ impl<T: Float> Vector2<T> {
     
 }
 
-impl<T: Float + AddAssign + Ord> Transformable3D<T> for Vector2<T> {
+impl<T: Float + AddAssign> Transformable3D<T> for Vector2<T> {
     type Output = Self;
     /// Transforms the box by a 4x4 matrix.
     fn transform(&self, matrix: Matrix4x4<T>) -> Self {
@@ -756,7 +756,7 @@ impl<T: Float> Line2D<T> {
     }
 }
 
-impl<T: Float + Ord> Transform<T> {
+impl<T: Float + PartialOrd> Transform<T> {
     pub fn identity(&self) -> Self {
         Self { position: Vector3::<T>::zero(), orientation: Quaternion::<T>::identity() }
     }
@@ -1108,7 +1108,7 @@ impl<T: Float + AddAssign> AABox<T> {
     }
 }
 
-impl<T: Float + AddAssign + Ord> Transformable3D<T> for AABox<T> {
+impl<T: Float + AddAssign> Transformable3D<T> for AABox<T> {
     type Output = Self;
     /// Transforms the box by a 4x4 matrix.
     fn transform(&self, mat: Matrix4x4<T>) -> Self {
@@ -1207,7 +1207,7 @@ impl<T: Float> AABox2D<T> {
     }
 }
 
-impl<T: Float + Ord> Quaternion<T> {
+impl<T: Float + PartialOrd> Quaternion<T> {
     /// Returns a Quaternion representing no rotation. 
     pub fn identity() -> Self { Self { x: T::zero(), y: T::zero(), z: T::zero(), w: T::one() } }
     /// Returns whether the Quaternion is the identity Quaternion.
@@ -1351,7 +1351,9 @@ impl<T: Float + Ord> Quaternion<T> {
         let axis = from_a.cross(to_b);
         let length_squared = axis.length_squared();
         if length_squared > T::zero() {
-            Self::new_from_axis_angle(axis / length_squared.sqrt(), from_a.dot(to_b).clamp(-T::one(), T::one()).acos())
+            Self::new_from_axis_angle(
+                axis / length_squared.sqrt(), 
+                math3d_ops::clamp(from_a.dot(to_b),-T::one(), T::one()).acos())
         } else {
             if (from_a + to_b).almost_zero(constants::tolerance()) {
                 Self::new_from_axis_angle(up.unwrap_or(Vector3::unit_z()), T::from(std::f32::consts::PI).unwrap())
@@ -1575,16 +1577,16 @@ impl<T: Float + Ord> Quaternion<T> {
 //     }
 // }
 
-impl<T: Float + Ord> From<HorizontalCoordinate<T>> for Quaternion<T> {
+impl<T: Float + PartialOrd> From<HorizontalCoordinate<T>> for Quaternion<T> {
     fn from(angle: HorizontalCoordinate<T>) -> Self { Self::new_from_horizontal_coordinate(angle) }
 }
 
-// impl<T: Float + Ord> From<Quaternion<T>> for HorizontalCoordinate<T> {
+// impl<T: Float + PartialOrd> From<Quaternion<T>> for HorizontalCoordinate<T> {
 //     fn from(q: Quaternion<T>) -> Self {  q.to_spherical_angle()  }
 // }
 
 
-impl<T: Float + Ord> Plane<T> {
+impl<T: Float + PartialOrd> Plane<T> {
     #[inline(always)]
     pub fn new_from_coordinates(x: T, y: T, z: T, d: T) -> Self {
         Self { normal: Vector3 { x, y, z }, d }
@@ -1692,7 +1694,7 @@ impl<T: Float + Ord> Plane<T> {
 
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Plane<T> {
+impl<T: Float> Transformable3D<T> for Plane<T> {
     type Output = Self;
 
     /// Transforms a vector by the given matrix.
@@ -1713,7 +1715,7 @@ impl<T: Float + Ord> Transformable3D<T> for Plane<T> {
     }
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Quad<T> {
+impl<T: Float> Transformable3D<T> for Quad<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -1742,7 +1744,7 @@ impl<T: Float> Points<T> for Quad<T> {
     }
 }
 
-impl<T: Float + AddAssign<T> + Ord> Sphere<T> {
+impl<T: Float + AddAssign<T> + PartialOrd> Sphere<T> {
     /// Test if a bounding box is fully inside, outside, or just intersecting the sphere.
     pub fn contains_box(&self, aabox: &AABox<T>) -> ContainmentType {
         let mut inside = true;
@@ -1932,7 +1934,7 @@ impl<T: Float + AddAssign<T> + Ord> Sphere<T> {
 
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Sphere<T> {
+impl<T: Float> Transformable3D<T> for Sphere<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -1948,7 +1950,7 @@ impl<T: Float + Ord> Transformable3D<T> for Sphere<T> {
 
 // Assuming necessary struct and function definitions for AABox, Plane, Sphere, Triangle, Ray, Vector3, and Matrix4x4
 
-impl<T: Float + Ord> Ray<T> {
+impl<T: Float + PartialOrd> Ray<T> {
     #[inline(always)]
     pub fn intersects_box(&self, aabox: &AABox<T>) -> Option<T> {
         let mut t_min = None;
@@ -2060,7 +2062,7 @@ impl<T: Float + Ord> Ray<T> {
 
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Ray<T> {
+impl<T: Float> Transformable3D<T> for Ray<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -2071,7 +2073,7 @@ impl<T: Float + Ord> Transformable3D<T> for Ray<T> {
     }
 }
 
-impl<T: Float + AddAssign + Ord> Triangle<T> {
+impl<T: Float + AddAssign + PartialOrd> Triangle<T> {
     pub fn length_a(&self) -> T { self.a.distance(self.b) }
     pub fn length_b(&self) -> T { self.b.distance(self.c) }
     pub fn length_c(&self) -> T { self.c.distance(self.a)}
@@ -2111,7 +2113,7 @@ impl<T: Float + AddAssign + Ord> Triangle<T> {
     pub fn ac(&self) -> Line<T> { self.ca().inverse() }
 }
 
-impl<T: Float + Ord> Transformable3D<T> for Triangle<T> {
+impl<T: Float> Transformable3D<T> for Triangle<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -2186,17 +2188,17 @@ impl<T: Float> Points2D<T> for Triangle2D<T> {
 
 
 
-impl<T: Float + Ord> Transform<T> {
+impl<T: Float + PartialOrd> Transform<T> {
     pub fn to_matrix(&self) -> Matrix4x4<T> { Matrix4x4::create_trs(self.position, self.orientation, Vector3::one()) }
 }
 
 
-impl<T: Float + Ord> ValueDomain<T> {
+impl<T: Float + PartialOrd> ValueDomain<T> {
     pub fn new(lower: T, upper: T) -> Self { Self { lower, upper } }
-    pub fn normalize(&self, value: T) -> T { value.clamp(self.lower, self.upper) / self.upper }
+    pub fn normalize(&self, value: T) -> T { math3d_ops::clamp(value, self.lower, self.upper) / self.upper }
 }
 
-impl<T: PartialEq + std::hash::Hash + Default + Ord + Div<Output = T>> Stats<T> {
+impl<T: PartialEq + std::hash::Hash + Default + PartialOrd + Div<Output = T>> Stats<T> {
     pub fn new(count: usize, min: T, max: T, sum: T) -> Self { Self { count, min, max, sum } }
 
     pub fn default() -> Self {
@@ -2212,7 +2214,7 @@ impl<T: PartialEq + std::hash::Hash + Default + Ord + Div<Output = T>> Stats<T> 
     where
         T: PartialOrd + Copy,
     {
-        value.max(self.min).min(self.max) / self.max
+        math3d_ops::min(math3d_ops::max(value, self.min), self.max) / self.max
     }
 }
 
@@ -2236,14 +2238,14 @@ where
     }
 }
 
-impl<T: PartialEq> std::cmp::Ord for Stats<T>
-where
-    T: std::cmp::PartialOrd + std::cmp::Ord,
-{
-    fn cmp(&self, other: &Stats<T>) -> std::cmp::Ordering {
-        self.sum.cmp(&other.sum)
-    }
-}
+// impl<T: PartialEq> std::cmp::Ord for Stats<T>
+// where
+//     T: std::cmp::PartialOrd,
+// {
+//     fn cmp(&self, other: &Stats<T>) -> std::cmp::Ordering {
+//         self.sum.cmp(&other.sum)
+//     }
+// }
 
 impl<T: std::fmt::Debug> std::fmt::Display for Stats<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -2259,7 +2261,7 @@ impl<T: std::fmt::Debug> std::fmt::Display for Stats<T> {
     }
 }
 
-impl<T: Float + Ord> Matrix4x4<T> {
+impl<T: Float + PartialOrd> Matrix4x4<T> {
     pub fn col0(&self) -> Vector3<T> { Vector3::new(self.m11, self.m21, self.m31) }
     pub fn col1(&self) -> Vector3<T> { Vector3::new(self.m12, self.m22, self.m32) }
     pub fn col2(&self) -> Vector3<T> { Vector3::new(self.m13, self.m23, self.m33) }
