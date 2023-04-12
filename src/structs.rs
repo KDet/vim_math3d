@@ -385,9 +385,9 @@ impl<T: Float> Transformable3D<T> for Vector4<T> {
 
 impl<T: Float + PartialOrd> Vector3<T> {
     #[inline(always)]
-    pub fn from_xy(x: T, y: T) -> Self { Self { x, y, z: T::zero() } }
+    pub fn new_from_xy(x: T, y: T) -> Self { Self { x, y, z: T::zero() } }
     #[inline(always)]
-    pub fn from_vec2(xy: Vector2<T>, z: T) -> Self { Self { x: xy.x, y: xy.y, z } }
+    pub fn new_from_vector2(xy: Vector2<T>, z: T) -> Self { Self { x: xy.x, y: xy.y, z } }
 
     /// Computes the cross product of two vectors.
     #[inline(always)]
@@ -406,7 +406,7 @@ impl<T: Float + PartialOrd> Vector3<T> {
     pub fn reflect(self, normal: Self) -> Self { self - normal * self.dot(normal) * T::from(2).unwrap() }
     /// Transforms a vector normal by the given matrix.
     #[inline(always)]
-    pub fn transform_normal(self, matrix: &Matrix4x4<T>) -> Self {
+    pub fn transform_normal(self, matrix: Matrix4x4<T>) -> Self {
         Self {
             x: self.x * matrix.m11 + self.y * matrix.m21 + self.z * matrix.m31,
             y: self.x * matrix.m12 + self.y * matrix.m22 + self.z * matrix.m32,
@@ -564,9 +564,9 @@ impl<T: Float> Transformable3D<T> for Vector3<T> {
     /// Transforms a vector by the given matrix.
     fn transform(&self, matrix: Matrix4x4<T>) -> Self::Output {
         Self::Output {
-            x: self.x * matrix.m11 + self.y * matrix.m21 + self.z * matrix.m31, 
-            y: self.x * matrix.m12 + self.y * matrix.m22 + self.z * matrix.m32, 
-            z: self.x * matrix.m13 + self.y * matrix.m23 + self.z * matrix.m33,
+            x: self.x * matrix.m11 + self.y * matrix.m21 + self.z * matrix.m31 + matrix.m41, 
+            y: self.x * matrix.m12 + self.y * matrix.m22 + self.z * matrix.m32 + matrix.m42,  
+            z: self.x * matrix.m13 + self.y * matrix.m23 + self.z * matrix.m33 + matrix.m43,
         }
     }
 }
@@ -2068,7 +2068,7 @@ impl<T: Float> Transformable3D<T> for Ray<T> {
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
         Self {
             position: self.position.transform(mat),
-            direction: self.direction.transform_normal(&mat),
+            direction: self.direction.transform_normal(mat),
         }
     }
 }

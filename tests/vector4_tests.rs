@@ -7,15 +7,15 @@ fn equal<T: Float>(a: T, b: T) -> bool {
     (a - b).abs() < T::from(1e-5).unwrap()
 }
 
-#[test]
-fn vector4_marshal_size_test() {
-    assert_eq!(16, std::mem::size_of::<Vector4<f32>>());
-}
-
 fn hash_code<T: Float>(v: &Vector4<T>) -> u64 {
     let mut hasher = DefaultHasher::new();
     v.hash(&mut hasher);
     hasher.finish()
+}
+
+#[test]
+fn vector4_marshal_size_test() {
+    assert_eq!(16, std::mem::size_of::<Vector4<f32>>());
 }
 
 #[test]
