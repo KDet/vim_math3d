@@ -1,12 +1,8 @@
+use num_traits::Float;
 use std::{hash::{Hash, Hasher}, collections::hash_map::DefaultHasher};
+use vim_math3d::{self, Vector2, Vector3, Vector4, Matrix4x4, Transformable3D, Quaternion};
 
-use num_traits::{Float, Num};
-use vim_math3d::{self, Vector2, Line2D, stateless_random, Vector4, math3d_ops, Vector3, Matrix4x4, Transformable3D, Quaternion};
-
-fn equal<T: Float>(a: T, b: T) -> bool {
-    (a - b).abs() < T::from(1e-5).unwrap()
-}
-
+fn equal<T: Float>(a: T, b: T) -> bool { (a - b).abs() < T::from(1e-5).unwrap() }
 fn hash_code<T: Float>(v: &Vector4<T>) -> u64 {
     let mut hasher = DefaultHasher::new();
     v.hash(&mut hasher);

@@ -5,7 +5,7 @@ pub fn xy_plane<T: Float>() -> Plane<T> { Plane::<T> { normal: Vector3::new(T::z
 pub fn xz_plane<T: Float>() -> Plane<T> { Plane::<T> { normal: Vector3::new(T::zero(), T::one(), T::zero()), d: T::zero() } }
 pub fn yz_plane<T: Float>() -> Plane<T> { Plane::<T> { normal: Vector3::new(T::one(), T::zero(), T::zero()), d: T::zero() } }
 
-pub fn tolerance<T: Float>() -> T { T::from(0.0000001).unwrap() }
+pub fn tolerance<T: Float>() -> T { T::from(0.0000001f32).unwrap() }
 pub fn pi<T: Float + FloatConst>() -> T { T::PI() }
 pub fn half_pi<T: Float + FloatConst>() -> T { T::PI() / T::from(2).unwrap() }
 pub fn two_pi<T: Float + FloatConst>() -> T { T::PI() * T::from(2).unwrap() }
