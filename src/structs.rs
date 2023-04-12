@@ -1604,7 +1604,7 @@ impl<T: Float + PartialOrd> Plane<T> {
         let b = point3 - point1;
         let n = a.cross(b);
         let d = -n.normalize().dot(point1);
-        Self { normal: n, d }
+        Self { normal: n.normalize(), d }
     }
 
     /// Creates a Plane with the given normal that contains the point
@@ -1667,9 +1667,9 @@ impl<T: Float + PartialOrd> Plane<T> {
 
     /// Projects a point onto the plane
     #[inline]
-    pub fn project_point_onto_plane(plane: &Plane<T>, point: Vector3<T>) -> Vector3<T> {
-        let dist = point.dot(plane.normal) - plane.d;
-        point - plane.normal * dist
+    pub fn project_point_onto_plane(&self, point: Vector3<T>) -> Vector3<T> {
+        let dist = point.dot(self.normal) - self.d;
+        point - self.normal * dist
     }
 
     /// Calculates the dot product of a Plane and Vector4.
@@ -1678,11 +1678,11 @@ impl<T: Float + PartialOrd> Plane<T> {
 
     /// Returns the dot product of a specified Vector3 and the normal vector of this Plane plus the distance (D) value of the Plane.
     #[inline]
-    pub fn dot_coordinate(plane: &Plane<T>, value: Vector3<T>) -> T { plane.normal.dot(value) + plane.d }
+    pub fn dot_coordinate(&self, value: Vector3<T>) -> T { self.normal.dot(value) + self.d }
 
     /// Returns the dot product of a specified Vector3 and the Normal vector of this Plane.
     #[inline]
-    pub fn dot_normal(plane: &Plane<T>, value: Vector3<T>) -> T { plane.normal.dot(value) }
+    pub fn dot_normal(&self, value: Vector3<T>) -> T { self.normal.dot(value) }
 
     /// Returns a value less than zero if the points is below the plane, above zero if above the plane, or zero if coplanar
     #[inline]
