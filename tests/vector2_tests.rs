@@ -1,6 +1,6 @@
-use num_traits::{Float, ToPrimitive};
+use num_traits::Float;
 use std::{hash::{Hash, Hasher}, collections::hash_map::DefaultHasher, ops::{Add, Div, Mul, Neg, Sub}};
-use vim_math3d::{self, Vector2, Vector3, Matrix4x4, Transformable3D, Quaternion, constants, math3d_ops};
+use vim_math3d::{self, Vector2, Matrix4x4, Transformable3D, Quaternion};
 
 fn equal<T: Float>(a: T, b: T) -> bool { (a - b).abs() < T::from(1e-5).unwrap() }
 fn hash_code<T: Float>(v: &Vector2<T>) -> u64 {

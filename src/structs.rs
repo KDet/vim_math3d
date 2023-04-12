@@ -2039,7 +2039,8 @@ impl<T: Float + PartialOrd> Ray<T> {
     }
     // Adapted from https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     // Does not require or benefit from precomputed normals.
-    pub fn intersects_triangle(&self, tri: &Triangle<T>, tolerance: T) -> Option<T> {
+    pub fn intersects_triangle(&self, tri: &Triangle<T>, tolerance: Option<T>) -> Option<T> {
+        let tolerance = tolerance.unwrap_or(constants::tolerance());
         let edge1 = tri.b - tri.a;
         let edge2 = tri.c - tri.a;
 
