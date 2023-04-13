@@ -1367,11 +1367,20 @@ impl<T: Float + PartialOrd> Quaternion<T> {
     #[inline(always)]
     pub fn new_from_yaw_pitch_roll(yaw: T, pitch: T, roll: T) -> Self {
         let half = T::from(0.5).unwrap();
-        let (half_roll, half_pitch, half_yaw) = (roll * half, pitch * half, yaw * half);
-        let (sr, sp, sy) = (half_roll.sin(), half_pitch.sin(), half_yaw.sin());
-        let (cr, cp, cy) = (half_roll.cos(), half_pitch.cos(), half_yaw.cos());
+        let half_roll = roll * half;
+        let sr = half_roll.sin();
+        let cr = half_roll.cos();
 
-        Self { x: cy * sp * cr + sy * cp * sr,
+        let half_pitch = pitch * half;
+        let sp = half_pitch.sin();
+        let cp = half_pitch.cos();
+
+        let half_yaw = yaw * half;
+        let sy = half_yaw.sin();
+        let cy = half_yaw.cos();
+
+        Self { 
+            x: cy * sp * cr + sy * cp * sr,
             y: sy * cp * cr - cy * sp * sr,
             z: cy * cp * sr - sy * sp * cr,
             w: cy * cp * cr + sy * sp * sr, }
@@ -2862,10 +2871,22 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     
         let two = T::from(2).unwrap();
         Self::new(
-            T::one() - two * (yy + zz), two * (xy + wz), two * (xz - wy), T::zero(),
-            two * (xy - wz), T::one() - two * (zz + xx), two * (yz + wx), T::zero(),
-            two * (xz + wy), two * (yz - wx), T::one() - two * (yy + xx), T::zero(),
-            T::zero(), T::zero(), T::zero(), T::one(),
+            T::one() - two * (yy + zz), 
+            two * (xy + wz), 
+            two * (xz - wy), 
+            T::zero(),
+            two * (xy - wz), 
+            T::one() - two * (zz + xx), 
+            two * (yz + wx), 
+            T::zero(),
+            two * (xz + wy), 
+            two * (yz - wx), 
+            T::one() - two * (yy + xx), 
+            T::zero(),
+            T::zero(), 
+            T::zero(), 
+            T::zero(), 
+            T::one(),
         )
     }
     
@@ -2953,22 +2974,10 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     
      /// Calculates the determinant of the matrix.
     pub fn get_determinant(&self) -> T {
-        let a = self.m11;
-        let b = self.m12;
-        let c = self.m13;
-        let d = self.m14;
-        let e = self.m21;
-        let f = self.m22;
-        let g = self.m23;
-        let h = self.m24;
-        let i = self.m31;
-        let j = self.m32;
-        let k = self.m33;
-        let l = self.m34;
-        let m = self.m41;
-        let n = self.m42;
-        let o = self.m43;
-        let p = self.m44;
+        let a = self.m11; let b = self.m12; let c = self.m13; let d = self.m14;
+        let e = self.m21; let f = self.m22; let g = self.m23; let h = self.m24;
+        let i = self.m31; let j = self.m32; let k = self.m33; let l = self.m34;
+        let m = self.m41; let n = self.m42; let o = self.m43; let p = self.m44;
     
         let kp_lo = k * p - l * o;
         let jp_ln = j * p - l * n;
@@ -2976,11 +2985,11 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
         let ip_lm = i * p - l * m;
         let io_km = i * o - k * m;
         let in_jm = i * n - j * m;
-    
-        a * (f * kp_lo - g * jp_ln + h * jo_kn)
-            - b * (e * kp_lo - g * ip_lm + h * io_km)
-            + c * (e * jp_ln - f * ip_lm + h * in_jm)
-            - d * (e * jo_kn - f * io_km + g * in_jm)
+
+        a * (f * kp_lo - g * jp_ln + h * jo_kn) -
+        b * (e * kp_lo - g * ip_lm + h * io_km) +
+        c * (e * jp_ln - f * ip_lm + h * in_jm) -
+        d * (e * jo_kn - f * io_km + g * in_jm)
     }
     
     /// Attempts to calculate the inverse of the given matrix. If successful, result will contain the inverted matrix.
@@ -3280,18 +3289,26 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
         let mut p_vector_basis = [ matrix.row0(), matrix.row1(), matrix.row2() ];
         let mut pf_scales = [ p_vector_basis[0].length(), p_vector_basis[1].length(), p_vector_basis[2].length() ];
         
-        let (a, b, c) = {
-            let x = pf_scales[0];
-            let y = pf_scales[1];
-            let z = pf_scales[2];
-            if x < y {
-                if y < z { (2, 1, 0) } 
-                else { (1, if x < z { 2 } else { 0 }, if x < z { 0 } else { 2 }) }
-            } else {
-                if x < z { (2, 0, 1) } 
-                else { (0, if y < z { 2 } else { 1 }, if y < z { 1 } else { 2 }) }
+        let x = pf_scales[0];
+        let y = pf_scales[1];
+        let z = pf_scales[2];
+
+        let a; let b; let c;
+        if x < y {
+            if y < z { a = 2; b = 1; c = 0; }
+            else {
+                a = 1;
+                if x < z { b = 2; c = 0; }
+                else { b = 0; c = 2; }
             }
-        };
+        }
+        else {
+            if x < z { a = 2; b = 0; c = 1; }
+            else { a = 0;
+                if y < z { b = 2; c = 1; }
+                else { b = 1; c = 2; }
+            }
+        }
     
         if pf_scales[a] < epsilon {
             p_vector_basis[a] = p_canonical_basis[a];
@@ -3302,11 +3319,15 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             let f_abs_x = p_vector_basis[a].x.abs();
             let f_abs_y = p_vector_basis[a].y.abs();
             let f_abs_z = p_vector_basis[a].z.abs();
-    
-            let cc = if f_abs_x < f_abs_y {
-                if f_abs_y < f_abs_z { 0 } else { if f_abs_x < f_abs_z { 0 } else { 2 } }
-            } else {
-                if f_abs_x < f_abs_z { 1 } else { if f_abs_y < f_abs_z { 1 } else { 2 } }
+            let cc;
+            if f_abs_x < f_abs_y {
+                if f_abs_y < f_abs_z { cc = 0; }
+                else { if f_abs_x < f_abs_z { cc = 0; } else { cc = 2; } }
+            }
+            else {
+                if f_abs_x < f_abs_z { cc = 1; } else {
+                    if f_abs_y < f_abs_z { cc = 1; } else { cc = 2; }
+                }
             };
             p_vector_basis[b] = p_vector_basis[a].cross(p_canonical_basis[cc]);
         }
@@ -3323,9 +3344,11 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             p_vector_basis[2],
         ).get_determinant();
     
+        // use Kramer's rule to check for handedness of coordinate system
         if det < T::zero() {
             pf_scales[a] = -pf_scales[a];
             p_vector_basis[a] = -p_vector_basis[a];
+            det = -det;
         }
     
         det = det - T::one();
