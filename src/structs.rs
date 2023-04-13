@@ -3,7 +3,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub, AddAssign};
 use num_traits::{Float, Zero, One };
 use std::hash::Hash;
 
-use vim_math3d_macro_derive::{StructOps, VectorOps, IntervalOps,  VectorStructOps};
+use vim_math3d_macro_derive::{StructOps, VectorOps, IntervalOps, VectorComponentOps, VectorOperators};
 use crate::transformable::{Transformable3D, Points, Mappable, Points2D};
 use crate::{math3d_ops, constants};
 
@@ -75,7 +75,7 @@ pub struct ColorRGBA {
     pub a: u8,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct Complex<T: Float = f64> {
     pub real: T,
     pub imaginary: T,
@@ -88,39 +88,39 @@ pub struct CylindricalCoordinate<T: Float = f64> {
     pub height: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct Euler<T: Float = f32> {
     pub yaw: T,
     pub pitch: T,
     pub roll: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct GeoCoordinate<T: Float = f64> {
     pub latitude: T,
     pub longitude: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct HorizontalCoordinate<T: Float = f64> {
     pub azimuth: T,
     pub inclination: T,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct Int2 {
     pub x: i32,
     pub y: i32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct Int3 {
     pub x: i32,
     pub y: i32,
     pub z: i32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps, VectorOperators)]
 pub struct Int4 {
     pub x: i32,
     pub y: i32,
@@ -180,7 +180,7 @@ pub struct Quad2D<T: Float = f32> {
     pub d: Vector2::<T>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorStructOps)]
+#[derive(Debug, Clone, Copy, PartialEq, StructOps, VectorComponentOps)]
 pub struct Quaternion<T: Float = f32> {
     pub x: T,
     pub y: T,
@@ -227,20 +227,20 @@ pub struct Triangle2D<T: Float = f32> {
     pub c: Vector2::<T>,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorComponentOps, VectorOperators, VectorOps)]
 pub struct Vector2<T: Float> {
     pub x: T,
     pub y: T,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorComponentOps, VectorOperators, VectorOps)]
 pub struct Vector3<T: Float> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorStructOps, VectorOps)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, StructOps, VectorComponentOps, VectorOperators, VectorOps)]
 pub struct Vector4<T: Float> {
     pub x: T,
     pub y: T,
@@ -1242,7 +1242,7 @@ impl<T: Float + PartialOrd> Quaternion<T> {
     #[inline(always)]
     /// A structure encapsulating a four-dimensional vector (x,y,z,w), 
     /// which is used to efficiently rotate an object about the (x,y,z) vector by the angle theta, where w = cos(theta/2).
-    pub fn create_from_rotation_matrix(matrix: Matrix4x4<T>) -> Quaternion<T> {
+    pub fn new_from_rotation_matrix(matrix: Matrix4x4<T>) -> Quaternion<T> {
         let trace = matrix.m11 + matrix.m22 + matrix.m33;
         let half = T::from(0.5).unwrap();
     
@@ -1257,7 +1257,6 @@ impl<T: Float + PartialOrd> Quaternion<T> {
                 w);
         }
         if matrix.m11 >= matrix.m22 && matrix.m11 >= matrix.m33 {
-            let half = T::from(0.5).unwrap();
             let s = (T::one() + matrix.m11 - matrix.m22 - matrix.m33).sqrt();
             let invs = half / s;
             return Quaternion::new(
@@ -1268,7 +1267,6 @@ impl<T: Float + PartialOrd> Quaternion<T> {
             );
         }
         if matrix.m22 > matrix.m33 {
-            let half = T::from(0.5).unwrap();
             let s = (T::one() + matrix.m22 - matrix.m11 - matrix.m33).sqrt();
             let invs = half / s;
             return Quaternion::new(
@@ -1277,8 +1275,9 @@ impl<T: Float + PartialOrd> Quaternion<T> {
                 (matrix.m32 + matrix.m23) * invs,
                 (matrix.m31 - matrix.m13) * invs,
             );
-        } else {
-            let s = (T::one() + matrix.m22 - matrix.m11 - matrix.m33).sqrt();
+        } 
+        {
+            let s = (T::one() + matrix.m33 - matrix.m11 - matrix.m22).sqrt();
             let invs = half / s;
             return Quaternion::new(
                 (matrix.m31 + matrix.m13) * invs,
@@ -1289,8 +1288,6 @@ impl<T: Float + PartialOrd> Quaternion<T> {
         }
     }
     
-
-
     /// Calculates the length of the Quaternion.
     #[inline(always)]
     pub fn length(&self) -> T { self.length_squared().sqrt() }
@@ -1330,19 +1327,19 @@ impl<T: Float + PartialOrd> Quaternion<T> {
         Self { x: T::zero(), y: T::zero(), z: (theta * half).sin(), w: (theta * half).cos() }
     }
 
-    // /// Creates a new look-at Quaternion
-    // #[inline(always)]
-    // pub fn look_at(position: Vector3<T>, target_position: Vector3<T>, up: Vector3<T>, forward: Vector3<T>) -> Self {
-    //     let plane = Plane::new_from_normal_and_point(up, position);
+    /// Creates a new look-at Quaternion
+    #[inline(always)]
+    pub fn look_at(position: Vector3<T>, target_position: Vector3<T>, up: Vector3<T>, forward: Vector3<T>) -> Self {
+        let plane = Plane::new_from_normal_and_point(up, position);
 
-    //     let projected_target = plane.project_point_onto_plane(target_position);
-    //     let projected_direction = (projected_target - position).normalize();
+        let projected_target = plane.project_point_onto_plane(target_position);
+        let projected_direction = (projected_target - position).normalize();
 
-    //     let q1 = Self::new_rotation_from_a_to_b(forward, projected_direction, Some(up));
-    //     let q2 = Self::new_rotation_from_a_to_b(projected_direction, (target_position - position).normalize(), Some(up));
+        let q1 = Self::new_rotation_from_a_to_b(forward, projected_direction, Some(up));
+        let q2 = Self::new_rotation_from_a_to_b(projected_direction, (target_position - position).normalize(), Some(up));
 
-    //     q2 * q1
-    // }
+        q2 * q1
+    }
 
     /// Creates a new Quaternion rotating vector 'fromA' to 'toB'.<br/>
     /// Precondition: fromA and toB are normalized.
@@ -1380,12 +1377,12 @@ impl<T: Float + PartialOrd> Quaternion<T> {
             w: cy * cp * cr + sy * sp * sr, }
     }
 
-    /// Creates a Quaternion from the given rotation matrix.
+    // Creates a Quaternion from the given rotation matrix.
     // #[inline(always)]
-    // fn new_from_rotation_matrix(matrix: Matrix4x4<T>) -> Quaternion<f32> {
+    // fn new_from_rotation_matrix(matrix: Matrix4x4<T>) -> Quaternion<T> {
     //     let trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
     //     if trace > T::zero() {
-    //         let s = (trace + 1.0).sqrt();
+    //         let s = (trace + T::one()).sqrt();
     //         let w = s * 0.5;
     //         let s = 0.5 / s;
     //         Self { x: (matrix[1][2] - matrix[2][1]) * s,
@@ -1493,18 +1490,18 @@ impl<T: Float + PartialOrd> Quaternion<T> {
         Vector3::<T> { x, y, z }
     }
 
-    // pub fn to_spherical_angle(&self) -> HorizontalCoordinate<T> {
-    //     self.to_spherical_angle_with_forward(Vector3::<T>::unit_y())
-    // }
+    pub fn to_spherical_angle(&self) -> HorizontalCoordinate<T> {
+        self.to_spherical_angle_with_forward(Vector3::<T>::unit_y())
+    }
 
-    // pub fn to_spherical_angle_with_forward(&self, forward_vector: Vector3<T>) -> HorizontalCoordinate<T> {
-    //     let new_forward = forward_vector.transform_quaternion(self);
-    //     let forward_xy = Vector3::new(new_forward.x, new_forward.y, T::zero()).normalize();
-    //     let angle = forward_xy.y.acos();
-    //     let azimuth = if forward_xy.x < T::zero() { angle } else { -angle };
-    //     let inclination = -new_forward.z.acos() + T::from(std::f32::consts::FRAC_PI_2).unwrap();
-    //     HorizontalCoordinate::<T> { azimuth, inclination }
-    // }
+    pub fn to_spherical_angle_with_forward(&self, forward_vector: Vector3<T>) -> HorizontalCoordinate<T> {
+        let new_forward = forward_vector.transform_quaternion(*self);
+        let forward_xy = Vector3::new(new_forward.x, new_forward.y, T::zero()).normalize();
+        let angle = forward_xy.y.acos();
+        let azimuth = if forward_xy.x < T::zero() { angle } else { -angle };
+        let inclination = -new_forward.z.acos() + T::from(std::f32::consts::FRAC_PI_2).unwrap();
+        HorizontalCoordinate::<T> { azimuth, inclination }
+    }
 
     pub fn new_from_horizontal_coordinate(angle: HorizontalCoordinate<T>) -> Self {
         Self::new_z_rotation(angle.azimuth) * Self::new_x_rotation(angle.inclination)
@@ -1514,76 +1511,76 @@ impl<T: Float + PartialOrd> Quaternion<T> {
 
 }
 
-// impl<T: Float> Neg for Quaternion<T> {
-//     type Output = Self;
-//     /// Flips the sign of each component of the quaternion.
-//     fn neg(self) -> Self::Output {
-//         Self { x: -self.x, y: -self.y, z: -self.z, w: -self.w }
-//     }
-// }
+impl<T: Float> Neg for Quaternion<T> {
+    type Output = Self;
+    /// Flips the sign of each component of the quaternion.
+    fn neg(self) -> Self::Output {
+        Self { x: -self.x, y: -self.y, z: -self.z, w: -self.w }
+    }
+}
 
-// impl<T: Float> Add for Quaternion<T> {
-//     type Output = Self;
-//     /// Adds two Quaternions element-by-element.
-//     fn add(self, rhs: Self) -> Self::Output {
-//         Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z, w: self.w + rhs.w }
-//     }
-// }
+impl<T: Float> Add for Quaternion<T> {
+    type Output = Self;
+    /// Adds two Quaternions element-by-element.
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z, w: self.w + rhs.w }
+    }
+}
 
-// impl<T: Float> Sub for Quaternion<T> {
-//     type Output = Self;
-//     /// Subtracts one Quaternion from another.
-//     fn sub(self, rhs: Self) -> Self::Output {
-//         Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z, w: self.w - rhs.w }
-//     }
-// }
+impl<T: Float> Sub for Quaternion<T> {
+    type Output = Self;
+    /// Subtracts one Quaternion from another.
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z, w: self.w - rhs.w }
+    }
+}
 
-// impl<T: Float> Mul for Quaternion<T> {
-//     type Output = Self;
-//     /// Multiplies two Quaternions together.
-//     fn mul(self, rhs: Self) -> Self::Output {
-//         let tmp_00 = (self.z - self.y) * (rhs.y - rhs.z);
-//         let tmp_01 = (self.s + self.x) * (rhs.s + rhs.x);
-//         let tmp_02 = (self.s - self.x) * (rhs.y + rhs.z);
-//         let tmp_03 = (self.y + self.z) * (rhs.s - rhs.x);
-//         let tmp_04 = (self.z - self.x) * (rhs.x - rhs.y);
-//         let tmp_05 = (self.z + self.x) * (rhs.x + rhs.y);
-//         let tmp_06 = (self.s + self.y) * (rhs.s - rhs.z);
-//         let tmp_07 = (self.s - self.y) * (rhs.s + rhs.z);
-//         let tmp_08 = tmp_05 + tmp_06 + tmp_07;
-//         let tmp_09 = (tmp_04 + tmp_08) * T::from(0.5).unwrap();
+impl<T: Float> Mul for Quaternion<T> {
+    type Output = Self;
+    /// Multiplies two Quaternions together.
+    fn mul(self, rhs: Self) -> Self::Output {
+        let tmp_00 = (self.z - self.y) * (rhs.y - rhs.z);
+        let tmp_01 = (self.w + self.x) * (rhs.w + rhs.x);
+        let tmp_02 = (self.w - self.x) * (rhs.y + rhs.z);
+        let tmp_03 = (self.y + self.z) * (rhs.w - rhs.x);
+        let tmp_04 = (self.z - self.x) * (rhs.x - rhs.y);
+        let tmp_05 = (self.z + self.x) * (rhs.x + rhs.y);
+        let tmp_06 = (self.w + self.y) * (rhs.w - rhs.z);
+        let tmp_07 = (self.w - self.y) * (rhs.w + rhs.z);
+        let tmp_08 = tmp_05 + tmp_06 + tmp_07;
+        let tmp_09 = (tmp_04 + tmp_08) * T::from(0.5).unwrap();
 
-//         Self { x: tmp_01 + tmp_09 - tmp_08,
-//             y: tmp_02 + tmp_09 - tmp_07,
-//             z: tmp_03 + tmp_09 - tmp_06,
-//             w: tmp_00 + tmp_09 - tmp_05,
-//         }
-//     }
-// }
+        Self { x: tmp_01 + tmp_09 - tmp_08,
+            y: tmp_02 + tmp_09 - tmp_07,
+            z: tmp_03 + tmp_09 - tmp_06,
+            w: tmp_00 + tmp_09 - tmp_05,
+        }
+    }
+}
 
-// impl<T: Float> Mul<T> for Quaternion<T> {
-//     type Output = Self;
-//     /// Multiplies a Quaternion by a scalar value.
-//     fn mul(self, rhs: T) -> Self::Output {
-//         Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, w: self.w * rhs}
-//     }
-// }
+impl<T: Float> Mul<T> for Quaternion<T> {
+    type Output = Self;
+    /// Multiplies a Quaternion by a scalar value.
+    fn mul(self, rhs: T) -> Self::Output {
+        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, w: self.w * rhs}
+    }
+}
 
-// impl<T: Float> Div for Quaternion<T> {
-//     type Output = Self;
-//     /// Divides a Quaternion by another Quaternion.
-//     fn div(self, rhs: Self) -> Self::Output {
-//         self * rhs.inverse()
-//     }
-// }
+impl<T: Float> Div for Quaternion<T> {
+    type Output = Self;
+    /// Divides a Quaternion by another Quaternion.
+    fn div(self, rhs: Self) -> Self::Output {
+        self * rhs.inverse()
+    }
+}
 
 impl<T: Float + PartialOrd> From<HorizontalCoordinate<T>> for Quaternion<T> {
     fn from(angle: HorizontalCoordinate<T>) -> Self { Self::new_from_horizontal_coordinate(angle) }
 }
 
-// impl<T: Float + PartialOrd> From<Quaternion<T>> for HorizontalCoordinate<T> {
-//     fn from(q: Quaternion<T>) -> Self {  q.to_spherical_angle()  }
-// }
+impl<T: Float + PartialOrd> From<Quaternion<T>> for HorizontalCoordinate<T> {
+    fn from(q: Quaternion<T>) -> Self {  q.to_spherical_angle()  }
+}
 
 
 impl<T: Float + PartialOrd> Plane<T> {
@@ -1609,7 +1606,7 @@ impl<T: Float + PartialOrd> Plane<T> {
 
     /// Creates a Plane with the given normal that contains the point
     #[inline(always)]
-    pub fn new_from_point_normal(point: Vector3<T>, normal: Vector3<T>) -> Self {
+    pub fn new_from_normal_and_point(normal: Vector3<T>, point: Vector3<T>) -> Self {
         let n = normal.normalize();
         let d = -n.dot(point);
         Self { normal: n, d }
@@ -3336,7 +3333,7 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
 
         if epsilon < det { return None; }
 
-        let rotation = Quaternion::create_from_rotation_matrix(Self::new_from_rows_vector3(
+        let rotation = Quaternion::new_from_rotation_matrix(Self::new_from_rows_vector3(
             p_vector_basis[0],
             p_vector_basis[1],
             p_vector_basis[2],

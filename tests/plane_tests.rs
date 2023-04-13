@@ -179,7 +179,7 @@ fn plane_transform_test2() {
     let m = Matrix4x4::create_rotation_x(30f32.to_radians()) * 
         Matrix4x4::create_rotation_y(30f32.to_radians()) * 
         Matrix4x4::create_rotation_z(30f32.to_radians());
-    let q = Quaternion::create_from_rotation_matrix(m);
+    let q = Quaternion::new_from_rotation_matrix(m);
 
     let x = target.normal.x;
     let y = target.normal.y;

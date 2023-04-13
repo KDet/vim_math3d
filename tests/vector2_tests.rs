@@ -346,7 +346,7 @@ fn vector2_transform_by_quaternion_test() {
     let m = Matrix4x4::create_rotation_x(30.0_f32.to_radians())
         * Matrix4x4::create_rotation_x(30.0_f32.to_radians())
         * Matrix4x4::create_rotation_x(30.0_f32.to_radians());
-    let q = Quaternion::create_from_rotation_matrix(m);
+    let q = Quaternion::new_from_rotation_matrix(m);
 
     let expected = v.transform(m);
     let actual = v.transform_quaternion(q);

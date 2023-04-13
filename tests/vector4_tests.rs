@@ -458,7 +458,7 @@ fn vector4_transform_vector2_quaternion_test() {
         * Matrix4x4::create_rotation_y(30.0f32.to_radians())
         * Matrix4x4::create_rotation_z(30.0f32.to_radians());
 
-    let q = Quaternion::<f32>::create_from_rotation_matrix(m);
+    let q = Quaternion::<f32>::new_from_rotation_matrix(m);
 
     let expected = v.transform_to_vector4(m);
     let actual = v.transform_to_vector4_quaternion(q);
@@ -473,7 +473,7 @@ fn vector4_transform_vector3_quaternion() {
         * Matrix4x4::create_rotation_y(30.0f32.to_radians())
         * Matrix4x4::create_rotation_z(30.0f32.to_radians());
 
-    let q = Quaternion::create_from_rotation_matrix(m);
+    let q = Quaternion::new_from_rotation_matrix(m);
 
     let expected = v.transform_to_vector4(m);
     let actual = v.transform_to_vector4_quaternion(q);
@@ -487,7 +487,7 @@ fn vector4_transform_vector4_quaternion_test() {
         * Matrix4x4::create_rotation_y(30.0f32.to_radians())
         * Matrix4x4::create_rotation_z(30.0f32.to_radians());
 
-    let q = Quaternion::create_from_rotation_matrix(m);
+    let q = Quaternion::new_from_rotation_matrix(m);
 
     let expected = v.transform(m);
     let actual = v.transform_quaternion(q);
@@ -528,7 +528,7 @@ fn vector4_transform_vector3_quaternion_test() {
     let m = Matrix4x4::create_rotation_x(30f32.to_radians()) *
         Matrix4x4::create_rotation_y(30f32.to_radians()) *
         Matrix4x4::create_rotation_z(30f32.to_radians());
-    let q = Quaternion::create_from_rotation_matrix(m);
+    let q = Quaternion::new_from_rotation_matrix(m);
 
     let expected = v.transform_to_vector4(m);
     let actual = v.transform_to_vector4_quaternion(q);

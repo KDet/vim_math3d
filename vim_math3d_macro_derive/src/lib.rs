@@ -205,9 +205,8 @@ pub fn derive_math_struct_ops(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-
-#[proc_macro_derive(VectorStructOps)]
-pub fn derive_math_vector_struct_ops(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(VectorComponentOps)]
+pub fn derive_math_vector_components_ops(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let ident = input.ident;
     let generics = input.generics;
@@ -274,7 +273,42 @@ pub fn derive_math_vector_struct_ops(input: TokenStream) -> TokenStream {
             #magnitude_squared
             pub fn dot(&self, other: Self) -> #type_param { #(self.#field_names * other.#field_names)+* }
         }
+    };
 
+    TokenStream::from(expanded)
+}
+
+#[proc_macro_derive(VectorOperators)]
+pub fn derive_math_vector_operators(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let ident = input.ident;
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    
+    let fields = match input.data {
+        Data::Struct(data) => match data.fields {
+            Fields::Named(named_fields) => named_fields.named,
+            _ => panic!("UnaryOps can only be derived for structs with named fields"),
+        },
+        _ => panic!("UnaryOps can only be derived for structs"),
+    };
+    let field_names = fields.iter().map(|field| &field.ident).map(|ident| quote! { #ident }).collect::<Vec<_>>();
+
+    let generics_params = generics
+        .type_params()
+        .next();
+    let type_param = match generics_params {
+        Some(gp) => { 
+            let t = &gp.ident;
+            quote! { #t }
+        }
+        None => {
+            let t =  &fields[0].ty;
+            quote! { #t }
+        }
+    };
+
+    let expanded = quote! { 
         impl #impl_generics Neg for #ident #ty_generics #where_clause {
             type Output = Self;
             fn neg(self) -> Self::Output { Self { #(#field_names: -self.#field_names),* } }
