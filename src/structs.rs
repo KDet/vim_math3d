@@ -2375,11 +2375,7 @@ impl<T: Float + FloatConst + PartialOrd<T>> Matrix4x4<T> {
         );
 
         let norm = z_axis.length_squared();
-        if norm < epsilon {
-            z_axis = -camera_forward_vector;
-        } else {
-            z_axis = z_axis * norm.sqrt().recip();
-        }
+        z_axis = if norm < epsilon { -camera_forward_vector } else { z_axis * norm.sqrt().recip() };
 
         let x_axis = camera_up_vector.cross(z_axis).normalize();
         let y_axis = z_axis.cross(x_axis);

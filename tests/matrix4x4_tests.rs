@@ -20,10 +20,10 @@ fn hash_float<T: Float>(v: T, hasher: &mut DefaultHasher) {
 
 fn generate_matrix_number_from_1_to_16() -> Matrix4x4<f32> {
     Matrix4x4::<f32>::new(
-        1.0, 2.0, 3.0, 4.0,
-        5.0, 6.0, 7.0, 8.0,
-        9.0, 10.0, 11.0, 12.0,
-        13.0, 14.0, 15.0, 16.0,
+        1.0f32, 2.0f32, 3.0f32, 4.0,
+        5.0f32, 6.0f32, 7.0f32, 8.0,
+        9.0f32, 10.0f32, 11.0f32, 12.0,
+        13.0f32, 14.0f32, 15.0f32, 16.0,
     )
 }
 
@@ -31,7 +31,7 @@ fn generate_test_matrix() -> Matrix4x4<f32> {
     let m = Matrix4x4::create_rotation_x(30.0f32.to_radians())
         * Matrix4x4::create_rotation_y(30.0f32.to_radians())
         * Matrix4x4::create_rotation_z(30.0f32.to_radians());
-    m * m.set_translation(Vector3::new(111.0f32, 222.0, 333.0))
+    m * m.set_translation(Vector3::new(111.0f32, 222.0f32, 333.0))
 }
 
 #[test]
@@ -160,7 +160,7 @@ fn matrix4x4_invert_rotation_test() {
 // A test for Invert (Matrix4x4)
 #[test]
 fn matrix4x4_invert_scale_test() {
-    let mtx = Matrix4x4::create_scale_xyz(23.0f32, 42.0, -666.0);
+    let mtx = Matrix4x4::create_scale_xyz(23.0f32, 42.0f32, -666.0);
     let actual = mtx.invert();
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -184,9 +184,9 @@ fn matrix4x4_invert_projection_test() {
 #[test]
 fn matrix4x4_invert_affine_test() {
     let mtx = 
-        Matrix4x4::create_from_yaw_pitch_roll(3.0f32, 4.0, 5.0) *
-        Matrix4x4::create_scale_xyz(23.0f32, 42.0, -666.0) *
-        Matrix4x4::create_translation_xyz(17.0f32, 53.0, 89.0);
+        Matrix4x4::create_from_yaw_pitch_roll(3.0f32, 4.0f32, 5.0) *
+        Matrix4x4::create_scale_xyz(23.0f32, 42.0f32, -666.0) *
+        Matrix4x4::create_translation_xyz(17.0f32, 53.0f32, 89.0);
     let actual = mtx.invert();
     assert!(actual.is_some());
     let actual = actual.unwrap();
@@ -236,12 +236,12 @@ fn decompose_test(yaw: f32, pitch: f32, roll: f32, expected_translation: Vector3
 // Various rotation decompose test.
 #[test]
 fn matrix4x4_decompose_test01() {
-    decompose_test(10.0f32, 20.0, 30.0, Vector3::new(10.0f32, 20.0, 30.0), Vector3::new(2.0, 3.0, 4.0));
+    decompose_test(10.0f32, 20.0f32, 30.0f32, Vector3::new(10.0f32, 20.0f32, 30.0), Vector3::new(2.0f32, 3.0f32, 4.0));
     let step: usize = 35;
     for yaw_angle in (-720..=720).step_by(step) {
         for pitch_angle in (-720..=720).step_by(step) {
             for roll_angle in (-720..=720).step_by(step) {
-                decompose_test(yaw_angle as f32, pitch_angle as f32, roll_angle as f32, Vector3::new(10.0f32, 20.0, 30.0), Vector3::new(2.0f32, 3.0, 4.0));
+                decompose_test(yaw_angle as f32, pitch_angle as f32, roll_angle as f32, Vector3::new(10.0f32, 20.0f32, 30.0), Vector3::new(2.0f32, 3.0f32, 4.0));
             }
         }
     }
@@ -250,17 +250,17 @@ fn matrix4x4_decompose_test01() {
 // Various scaled matrix decompose test.
 #[test]
 fn matrix4x4_decompose_test02() {
-    decompose_test(10.0f32, 20.0f32, 30.0, Vector3::new(10.0f32, 20.0, 30.0), Vector3::new(2.0f32, 3.0, 4.0));
+    decompose_test(10.0f32, 20.0f32, 30.0f32, Vector3::new(10.0f32, 20.0f32, 30.0), Vector3::new(2.0f32, 3.0f32, 4.0));
 
     // Various scales.
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(1.0f32, 2.0, 3.0));
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(1.0f32, 3.0, 2.0));
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(2.0f32, 1.0, 3.0));
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(2.0f32, 3.0, 1.0));
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(3.0f32, 1.0, 2.0));
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(3.0f32, 2.0, 1.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(1.0f32, 2.0f32, 3.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(1.0f32, 3.0f32, 2.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(2.0f32, 1.0f32, 3.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(2.0f32, 3.0f32, 1.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(3.0f32, 1.0f32, 2.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(3.0f32, 2.0f32, 1.0));
 
-    decompose_test(0.0f32, 0.0, 0.0, Vector3::zero(), Vector3::new(-2.0f32, 1.0, 1.0));
+    decompose_test(0.0f32, 0.0f32, 0.0f32, Vector3::zero(), Vector3::new(-2.0f32, 1.0f32, 1.0));
 
     // Small scales.
     decompose_test(0f32, 0f32, 0f32, Vector3::zero(), Vector3::new(1e-4f32, 2e-4f32, 3e-4f32));
@@ -317,9 +317,9 @@ fn decompose_scale_test(sx: f32, sy: f32, sz: f32) {
 fn matrix4x4_decompose_test03() {
     decompose_scale_test(1.0f32, 2e-4, 3e-4);
     decompose_scale_test(1.0f32, 3e-4, 2e-4);
-    decompose_scale_test(2e-4f32, 1.0, 3e-4);
+    decompose_scale_test(2e-4f32, 1.0f32, 3e-4);
     decompose_scale_test(2e-4f32, 3e-4, 1.0);
-    decompose_scale_test(3e-4f32, 1.0, 2e-4);
+    decompose_scale_test(3e-4f32, 1.0f32, 2e-4);
     decompose_scale_test(3e-4f32, 2e-4, 1.0);
 }
 
@@ -330,27 +330,27 @@ fn matrix4x4_extract_scale_test() {
         assert!(m.extract_direct_scale().almost_equals(&s, 1e-5), "Failed to extract similar scale to input");
     }
 
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 1.0), Vector3::zero());
-    extract_scale_test(Vector3::new(-1.0f32, 2.0, 1.0), Vector3::zero());
-    extract_scale_test(Vector3::new(-1.0f32, 2.0, -1.0), Vector3::zero());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 1.0), Vector3::zero());
+    extract_scale_test(Vector3::new(-1.0f32, 2.0f32, 1.0), Vector3::zero());
+    extract_scale_test(Vector3::new(-1.0f32, 2.0f32, -1.0), Vector3::zero());
 
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), Vector3::unit_x());
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), Vector3::unit_y());
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), Vector3::unit_z());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), Vector3::unit_x());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), Vector3::unit_y());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), Vector3::unit_z());
 
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), -Vector3::unit_x());
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), -Vector3::unit_y());
-    extract_scale_test(Vector3::new(1.0f32, 2.0, 0.75), -Vector3::unit_z());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), -Vector3::unit_x());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), -Vector3::unit_y());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), -Vector3::unit_z());
 
-    extract_scale_test(Vector3::new(-1.0f32, 2.0, 0.75), -Vector3::unit_x());
-    extract_scale_test(Vector3::new(1.0f32, -2.0, -0.75), -Vector3::unit_y());
-    extract_scale_test(Vector3::new(1.0f32, 2.0, -0.75), -Vector3::unit_z());
+    extract_scale_test(Vector3::new(-1.0f32, 2.0f32, 0.75), -Vector3::unit_x());
+    extract_scale_test(Vector3::new(1.0f32, -2.0f32, -0.75), -Vector3::unit_y());
+    extract_scale_test(Vector3::new(1.0f32, 2.0f32, -0.75), -Vector3::unit_z());
 
     // Note, for more complex rotations the extraction will not return the same scale
     // These scenarios could potentially be handled by figuring out which of the
     // axis are still in the same RH configuration, but that is a bit beyond the current scope
     // and would be better handled by a full decomposition.
-    //extract_scale_test(Vector3::new(1.0, 2.0, 0.75), Vector3::new(0.5, 0.3, 1.75));
+    //extract_scale_test(Vector3::new(1.0f32, 2.0f32, 0.75), Vector3::new(0.5, 0.3, 1.75));
 }
 
 #[test]
@@ -460,7 +460,7 @@ fn matrix4x4_create_rotation_y_test1() {
 #[test]
 fn matrix4x4_create_rotation_y_center_test() {
     let radians = 30.0f32.to_radians();
-    let center = Vector3::new(23.0f32, 42.0, 66.0);
+    let center = Vector3::new(23.0f32, 42.0f32, 66.0);
 
     let rotate_around_zero = Matrix4x4::create_rotation_y_centered(radians, Vector3::zero());
     let rotate_around_zero_expected = Matrix4x4::create_rotation_y(radians);
@@ -561,7 +561,7 @@ fn matrix4x4_create_shadow_test01() {
     let light_dir = Vector3::unit_y();
     let plane = Plane::new(Vector3::unit_y(), 0.0f32);
 
-    let expected = Matrix4x4::create_scale_xyz(1.0, 0.0, 1.0);
+    let expected = Matrix4x4::create_scale_xyz(1.0f32, 0.0f32, 1.0);
 
     let actual = Matrix4x4::create_shadow(light_dir, plane);
     assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_shadow did not returned expected value.");
@@ -570,20 +570,20 @@ fn matrix4x4_create_shadow_test01() {
 #[test]
 fn matrix4x4_create_shadow_test02() {
     let planes = [
-        Plane::new_from_coordinates(0.0f32, 1.0, 0.0, 0.0),
-        Plane::new_from_coordinates(1.0f32, 2.0, 3.0, 4.0),
-        Plane::new_from_coordinates(5.0f32, 6.0, 7.0, 8.0),
-        Plane::new_from_coordinates(-1.0f32, -2.0, -3.0, -4.0),
-        Plane::new_from_coordinates(-5.0f32, -6.0, -7.0, -8.0),
+        Plane::new_from_coordinates(0.0f32, 1.0f32, 0.0f32, 0.0),
+        Plane::new_from_coordinates(1.0f32, 2.0f32, 3.0f32, 4.0),
+        Plane::new_from_coordinates(5.0f32, 6.0f32, 7.0f32, 8.0),
+        Plane::new_from_coordinates(-1.0f32, -2.0f32, -3.0f32, -4.0),
+        Plane::new_from_coordinates(-5.0f32, -6.0f32, -7.0f32, -8.0),
     ];
 
     let points = [
-        Vector3::new(1.0f32, 2.0, 3.0),
-        Vector3::new(5.0f32, 6.0, 7.0),
-        Vector3::new(8.0f32, 9.0, 10.0),
-        Vector3::new(-1.0f32, -2.0, -3.0),
-        Vector3::new(-5.0f32, -6.0, -7.0),
-        Vector3::new(-8.0f32, -9.0, -10.0),
+        Vector3::new(1.0f32, 2.0f32, 3.0),
+        Vector3::new(5.0f32, 6.0f32, 7.0),
+        Vector3::new(8.0f32, 9.0f32, 10.0),
+        Vector3::new(-1.0f32, -2.0f32, -3.0),
+        Vector3::new(-5.0f32, -6.0f32, -7.0),
+        Vector3::new(-8.0f32, -9.0f32, -10.0),
     ];
 
     for p in planes.iter() {
@@ -661,33 +661,33 @@ fn matrix4x4_create_reflection_test01() {
     // XY plane.
     create_reflection_test(
         Plane::new(Vector3::unit_z(), 0.0f32),
-        Matrix4x4::create_scale_xyz(1.0f32, 1.0, -1.0),
+        Matrix4x4::create_scale_xyz(1.0f32, 1.0f32, -1.0),
     );
     // XZ plane.
     create_reflection_test(
         Plane::new(Vector3::unit_y(), 0.0f32),
-        Matrix4x4::create_scale_xyz(1.0f32, -1.0, 1.0),
+        Matrix4x4::create_scale_xyz(1.0f32, -1.0f32, 1.0),
     );
     // YZ plane.
     create_reflection_test(
         Plane::new(Vector3::unit_x(), 0.0f32),
-        Matrix4x4::create_scale_xyz(-1.0f32, 1.0, 1.0),
+        Matrix4x4::create_scale_xyz(-1.0f32, 1.0f32, 1.0),
     );
 
     // Complex cases.
     let planes = [
-        Plane::new_from_coordinates(0.0f32, 1.0, 0.0, 0.0),
-        Plane::new_from_coordinates(1.0f32, 2.0, 3.0, 4.0),
-        Plane::new_from_coordinates(5.0f32, 6.0, 7.0, 8.0),
-        Plane::new_from_coordinates(-1.0f32, -2.0, -3.0, -4.0),
-        Plane::new_from_coordinates(-5.0f32, -6.0, -7.0, -8.0),
+        Plane::new_from_coordinates(0.0f32, 1.0f32, 0.0f32, 0.0),
+        Plane::new_from_coordinates(1.0f32, 2.0f32, 3.0f32, 4.0),
+        Plane::new_from_coordinates(5.0f32, 6.0f32, 7.0f32, 8.0),
+        Plane::new_from_coordinates(-1.0f32, -2.0f32, -3.0f32, -4.0),
+        Plane::new_from_coordinates(-5.0f32, -6.0f32, -7.0f32, -8.0),
     ];
 
     let points = [
-        Vector3::new(1.0f32, 2.0, 3.0),
-        Vector3::new(5.0f32, 6.0, 7.0),
-        Vector3::new(-1.0f32, -2.0, -3.0),
-        Vector3::new(-5.0f32, -6.0, -7.0),
+        Vector3::new(1.0f32, 2.0f32, 3.0),
+        Vector3::new(5.0f32, 6.0f32, 7.0),
+        Vector3::new(-1.0f32, -2.0f32, -3.0),
+        Vector3::new(-5.0f32, -6.0f32, -7.0),
     ];
 
     for plane in planes.iter() {
@@ -730,7 +730,7 @@ fn matrix4x4_create_rotation_z_test() {
 #[test]
 fn matrix4x4_create_rotation_z_center_test() {
     let radians = 30.0f32.to_radians();
-    let center = Vector3::new(23.0f32, 42.0, 66.0);
+    let center = Vector3::new(23.0f32, 42.0f32, 66.0);
 
     let rotate_around_zero = Matrix4x4::create_rotation_z_centered(radians, Vector3::<f32>::zero());
     let rotate_around_zero_expected = Matrix4x4::create_rotation_z(radians);
@@ -746,9 +746,9 @@ fn matrix4x4_create_rotation_z_center_test() {
 // A test for CreateLookAt (Vector3f, Vector3f, Vector3f)
 #[test]
 fn matrix4x4_create_look_at_test() {
-    let camera_position = Vector3::new(10.0f32, 20.0, 30.0);
-    let camera_target = Vector3::new(3.0f32, 2.0, -4.0);
-    let camera_up_vector = Vector3::new(0.0f32, 1.0, 0.0);
+    let camera_position = Vector3::new(10.0f32, 20.0f32, 30.0);
+    let camera_target = Vector3::new(3.0f32, 2.0f32, -4.0);
+    let camera_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
 
     let mut expected = Matrix4x4::<f32>::zero();
     expected.m11 = 0.979457;
@@ -774,9 +774,9 @@ fn matrix4x4_create_look_at_test() {
 
 #[test]
 fn matrix4x4_create_world_test() {
-    let object_position = Vector3::new(10.0f32, 20.0, 30.0);
-    let object_forward_direction = Vector3::new(3.0f32, 2.0, -4.0);
-    let object_up_vector = Vector3::new(0.0f32, 1.0, 0.0);
+    let object_position = Vector3::new(10.0f32, 20.0f32, 30.0);
+    let object_forward_direction = Vector3::new(3.0f32, 2.0f32, -4.0);
+    let object_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
 
     let expected = Matrix4x4::<f32> {
         m11: 0.799999952f32,
@@ -905,7 +905,7 @@ fn matrix4x4_create_perspective_test_1() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_test_2() {
-    let _ = Matrix4x4::create_perspective(10.0f32, 10.0f32, -10.0, 10.0);
+    let _ = Matrix4x4::create_perspective(10.0f32, 10.0f32, -10.0f32, 10.0);
 }
 
 // A test for CreatePerspective (float, float, float, float)
@@ -913,7 +913,7 @@ fn matrix4x4_create_perspective_test_2() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_test_3() {
-    let _ = Matrix4x4::create_perspective(10.0f32, 10.0, 10.0, -10.0);
+    let _ = Matrix4x4::create_perspective(10.0f32, 10.0f32, 10.0f32, -10.0);
 }
 
 // A test for CreatePerspective (float, float, float, float)
@@ -921,7 +921,7 @@ fn matrix4x4_create_perspective_test_3() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_test_4() {
-    let _ = Matrix4x4::create_perspective(10.0f32, 10.0, 10.0, 1.0);
+    let _ = Matrix4x4::create_perspective(10.0f32, 10.0f32, 10.0f32, 1.0);
 }
 
 // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -948,7 +948,7 @@ fn matrix4x4_create_perspective_field_of_view_test() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_field_of_view_test1() {
-    let _ = Matrix4x4::create_perspective_field_of_view(-1.0f32, 1.0, 1.0, 10.0);
+    let _ = Matrix4x4::create_perspective_field_of_view(-1.0f32, 1.0f32, 1.0f32, 10.0);
 }
 
 // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -956,7 +956,7 @@ fn matrix4x4_create_perspective_field_of_view_test1() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_field_of_view_test2() {
-    let _ = Matrix4x4::create_perspective_field_of_view(PI + 0.01, 1.0, 1.0, 10.0);
+    let _ = Matrix4x4::create_perspective_field_of_view(PI + 0.01, 1.0f32, 1.0f32, 10.0);
 }
 
 // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -964,7 +964,7 @@ fn matrix4x4_create_perspective_field_of_view_test2() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_field_of_view_test3() {
-    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0, -1.0, 10.0);
+    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0f32, -1.0f32, 10.0);
 }
 
 // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -972,7 +972,7 @@ fn matrix4x4_create_perspective_field_of_view_test3() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_field_of_view_test4() {
-    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0, 1.0, -10.0);
+    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0f32, 1.0f32, -10.0);
 }
 
 // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -980,7 +980,7 @@ fn matrix4x4_create_perspective_field_of_view_test4() {
 #[test]
 #[should_panic]
 fn matrix4x4_create_perspective_field_of_view_test5() {
-    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0, 10.0, 1.0);
+    let _ = Matrix4x4::create_perspective_field_of_view(FRAC_PI_4, 1.0f32, 10.0f32, 1.0);
 }
 
 // A test for CreatePerspectiveOffCenter (float, float, float, float, float, float)
@@ -1268,7 +1268,7 @@ fn matrix4x4_transpose_test1() {
 
 #[test]
 fn matrix4x4_from_quaternion_test1() {
-    let axis = Vector3::new(1.0f32, 2.0, 3.0).normalize();
+    let axis = Vector3::new(1.0f32, 2.0f32, 3.0).normalize();
     let q = Quaternion::new_from_axis_angle(axis, 30.0f32.to_radians());
 
     let mut expected = Matrix4x4::<f32>::zero();
@@ -1404,10 +1404,10 @@ fn matrix4x4_from_quaternion_test5() {
 
 //     let expected = format!(
 //         "{{ {{M11:{:.1} M12:{:.1} M13:{:.1} M14:{:.1}}} {{M21:{:.1} M22:{:.1} M23:{:.1} M24:{:.1}}} {{M31:{:.1} M32:{:.1} M33:{:.1} M34:{:.1}}} {{M41:{:.1} M42:{:.1} M43:{:.1} M44:{:.1}}} }}",
-//         11.0, -12.0, -13.3, 14.4,
-//         21.0, 22.0, 23.0, 24.0,
-//         31.0, 32.0, 33.0, 34.0,
-//         41.0, 42.0, 43.0, 44.0
+//         11.0f32, -12.0f32, -13.3, 14.4,
+//         21.0f32, 22.0f32, 23.0f32, 24.0,
+//         31.0f32, 32.0f32, 33.0f32, 34.0,
+//         41.0f32, 42.0f32, 43.0f32, 44.0
 //     );
 
 //     let actual = a.to_string();
@@ -1512,10 +1512,10 @@ fn matrix4x4_multiply_test3() {
 fn matrix4x4_multiply_test5() {
     let a = generate_matrix_number_from_1_to_16();
     let expected = Matrix4x4::<f32>::new(
-        3.0, 6.0, 9.0, 12.0,
-        15.0, 18.0, 21.0, 24.0,
-        27.0, 30.0, 33.0, 36.0,
-        39.0, 42.0, 45.0, 48.0,
+        3.0f32, 6.0f32, 9.0f32, 12.0,
+        15.0f32, 18.0f32, 21.0f32, 24.0,
+        27.0f32, 30.0f32, 33.0f32, 36.0,
+        39.0f32, 42.0f32, 45.0f32, 48.0,
     );
     let actual = a.mul(3.0f32);
     assert_eq!(expected, actual);
@@ -1525,10 +1525,10 @@ fn matrix4x4_multiply_test5() {
 fn matrix4x4_multiply_test6() {
     let a = generate_matrix_number_from_1_to_16();
     let expected = Matrix4x4::new(
-        3.0, 6.0, 9.0, 12.0,
-        15.0, 18.0, 21.0, 24.0,
-        27.0, 30.0, 33.0, 36.0,
-        39.0, 42.0, 45.0, 48.0,
+        3.0f32, 6.0f32, 9.0f32, 12.0,
+        15.0f32, 18.0f32, 21.0f32, 24.0,
+        27.0f32, 30.0f32, 33.0f32, 36.0,
+        39.0f32, 42.0f32, 45.0f32, 48.0,
     );
     let actual = a * 3.0;
     assert_eq!(expected, actual);
@@ -1538,10 +1538,10 @@ fn matrix4x4_multiply_test6() {
 fn matrix4x4_negate_test() {
     let m = generate_matrix_number_from_1_to_16();
     let expected = Matrix4x4::<f32>::new(
-        -1.0, -2.0, -3.0, -4.0,
-        -5.0, -6.0, -7.0, -8.0,
-        -9.0, -10.0, -11.0, -12.0,
-        -13.0, -14.0, -15.0, -16.0,
+        -1.0f32, -2.0f32, -3.0f32, -4.0,
+        -5.0f32, -6.0f32, -7.0f32, -8.0,
+        -9.0f32, -10.0f32, -11.0f32, -12.0,
+        -13.0f32, -14.0f32, -15.0f32, -16.0,
     );
     let actual = m.neg();
     assert_eq!(expected, actual);
@@ -1591,4 +1591,783 @@ fn matrix4x4_subtract_test() {
 
     let actual = a.sub(b);
     assert_eq!(expected, actual);
+}
+
+fn create_billboard_fact(place_direction: Vector3<f32>, camera_up_vector: Vector3<f32>, expected_rotation: Matrix4x4<f32>) {
+    let camera_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let object_position = camera_position + place_direction * 10.0f32;
+    let expected = expected_rotation * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_billboard(object_position, camera_position, camera_up_vector, Vector3::new(0.0f32, 0.0f32, -1.0));
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_billboard_test01() {
+    create_billboard_fact(
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+        Matrix4x4::create_rotation_y(180.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test02() {
+    create_billboard_fact(
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+        Matrix4x4::create_rotation_y(0.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test03() {
+    create_billboard_fact(
+        Vector3::new(1.0f32, 0.0f32, 0.0),
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+        Matrix4x4::create_rotation_y(90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test04() {
+    create_billboard_fact(
+        Vector3::new(-1.0f32, 0.0f32, 0.0),
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+        Matrix4x4::create_rotation_y(-90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test05() {
+    create_billboard_fact(
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+        Matrix4x4::create_rotation_x(90.0f32.to_radians())
+            * Matrix4x4::create_rotation_z(180.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test06() {
+    create_billboard_fact(
+        Vector3::new(0.0f32, -1.0f32, 0.0),
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+        Matrix4x4::create_rotation_x(90.0f32.to_radians())
+            * Matrix4x4::create_rotation_z(0.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test07() {
+    create_billboard_fact(
+        Vector3::new(1.0f32, 0.0f32, 0.0),
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+        Matrix4x4::create_rotation_x(90.0f32.to_radians())
+            * Matrix4x4::create_rotation_z(90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test08() {
+    create_billboard_fact(
+        Vector3::new(-1.0f32, 0.0f32, 0.0),
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+        Matrix4x4::create_rotation_x(90.0f32.to_radians())
+            * Matrix4x4::create_rotation_z(-90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test09() {
+    create_billboard_fact(
+    Vector3::new(0.0f32, 1.0f32, 0.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(-90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test10() {
+    create_billboard_fact(
+    Vector3::new(0.0f32, -1.0f32, 0.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(90.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test11() {
+    create_billboard_fact(
+    Vector3::new(0.0f32, 0.0f32, -1.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(180.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_test12() {
+    create_billboard_fact(
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(0.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_billboard_too_close_test1() {
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let camera_position = object_position;
+    let camera_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
+
+    let expected = Matrix4x4::create_rotation_y(180.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_billboard(
+        object_position,
+        camera_position,
+        camera_up_vector,
+        Vector3::new(0.0f32, 0.0f32, 1.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_billboard_too_close_test2() {
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let camera_position = object_position;
+    let camera_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
+
+    let expected = Matrix4x4::create_rotation_y(-90.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_billboard(
+        object_position,
+        camera_position,
+        camera_up_vector,
+        Vector3::new(1.0f32, 0.0f32, 0.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_billboard did not return the expected value.");
+}
+
+fn create_constrained_billboard_fact(place_direction: Vector3<f32>, rotate_axis: Vector3<f32>, expected_rotation: Matrix4x4<f32>) {
+    let camera_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let object_position = camera_position + place_direction * 10.0f32;
+    let expected = expected_rotation * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(object_position, camera_position, rotate_axis, Vector3::new(0.0f32, 0.0f32, -1.0), Vector3::new(0.0f32, 0.0f32, -1.0));
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+
+    // When you move camera along rotateAxis, result must be same.
+    let mut camera_position = camera_position + rotate_axis * 10.0f32;
+    let actual = Matrix4x4::create_constrained_billboard(object_position, camera_position, rotate_axis, Vector3::new(0.0f32, 0.0f32, -1.0), Vector3::new(0.0f32, 0.0f32, -1.0));
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+
+    camera_position = camera_position - rotate_axis * 30.0f32;
+    let actual = Matrix4x4::create_constrained_billboard(object_position, camera_position, rotate_axis, Vector3::new(0.0f32, 0.0f32, -1.0), Vector3::new(0.0f32, 0.0f32, -1.0));
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_test01() {
+    // Place object at Forward side of camera on XZ-plane
+    // Object placed at Forward of camera. result must be same as 180 degrees rotate along y-axis.
+    create_constrained_billboard_fact(Vector3::new(0.0f32, 0.0f32, -1.0), Vector3::new(0.0f32, 1.0f32, 0.0), Matrix4x4::create_rotation_y(180.0f32.to_radians()));
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_test02() {
+    // Place object at Backward side of camera on XZ-plane
+    // Object placed at Backward of camera. This result must be same as 0 degrees rotate along y-axis.
+    create_constrained_billboard_fact(Vector3::new(0.0f32, 0.0f32, 1.0), Vector3::new(0.0f32, 1.0f32, 0.0), Matrix4x4::create_rotation_y(0.0f32.to_radians()));
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+#[test]
+fn matrix4x4_create_constrained_billboard_test03() {
+    // Place object at Right side of camera. This result must be same as 90 degrees rotate along y-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(1.0f32, 0.0f32, 0.0),
+    Vector3::new(0.0f32, 1.0f32, 0.0),
+    Matrix4x4::create_rotation_y(90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+#[test]
+fn matrix4x4_create_constrained_billboard_test04() {
+    // Place object at Left side of camera. This result must be same as -90 degrees rotate along y-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Vector3::new(0.0f32, 1.0f32, 0.0),
+    Matrix4x4::create_rotation_y(-90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+#[test]
+fn matrix4x4_create_constrained_billboard_test05() {
+    // Place object at Up side of camera. result must be same as 180 degrees rotate along z-axis after 90 degrees rotate along x-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, 1.0f32, 0.0),
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Matrix4x4::create_rotation_x(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_z(180.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+#[test]
+fn matrix4x4_create_constrained_billboard_test06() {
+    // Place object at Down side of camera. result must be same as 0 degrees rotate along z-axis after 90 degrees rotate along x-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, -1.0f32, 0.0),
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Matrix4x4::create_rotation_x(90.0f32.to_radians()) 
+        * Matrix4x4::create_rotation_z(0.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+#[test]
+fn matrix4x4_create_constrained_billboard_test07() {
+    // Place object at Right side of camera. result must be same as 90 degrees rotate along z-axis after 90 degrees rotate along x-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(1.0f32, 0.0f32, 0.0),
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Matrix4x4::create_rotation_x(90.0f32.to_radians()) 
+        * Matrix4x4::create_rotation_z(90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+// Place object at Left side of camera on XY-plane
+#[test]
+fn matrix4x4_create_constrained_billboard_test08() {
+    // Place object at Left side of camera. result must be same as -90 degrees rotate along z-axis after 90 degrees rotate along x-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Matrix4x4::create_rotation_x(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_z(-90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+// Place object at Up side of camera on YZ-plane
+#[test]
+fn matrix4x4_create_constrained_billboard_test09() {
+    // Place object at Up side of camera. result must be same as -90 degrees rotate along x-axis after 90 degrees rotate along z-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, 1.0f32, 0.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(-90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+// Place object at Down side of camera on YZ-plane
+#[test]
+fn matrix4x4_create_constrained_billboard_test10() {
+    // Place object at Down side of camera. result must be same as 90 degrees rotate along x-axis after 90 degrees rotate along z-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, -1.0f32, 0.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(90.0f32.to_radians()),
+    );
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+// Place object at Forward side of camera on YZ-plane
+#[test]
+fn matrix4x4_create_constrained_billboard_test11() {
+    // Place object at Forward side of camera. result must be same as 180 degrees rotate along x-axis after 90 degrees rotate along z-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, 0.0f32, -1.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(180.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_test12() {
+    // Place object at Backward side of camera. result must be same as 0 degrees rotate along x-axis after 90 degrees rotate along z-axis.
+    create_constrained_billboard_fact(
+    Vector3::new(0.0f32, 0.0f32, 1.0),
+    Vector3::new(-1.0f32, 0.0f32, 0.0),
+    Matrix4x4::create_rotation_z(90.0f32.to_radians())
+        * Matrix4x4::create_rotation_x(0.0f32.to_radians()),
+    );
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_too_close_test1() {
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let camera_position = object_position;
+    let camera_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
+
+    // Doesn't pass camera face direction. CreateConstrainedBillboard uses new Vector3f(0f32, 0f32, -1) direction. Result must be same as 180 degrees rotate along y-axis.
+    let expected = 
+        Matrix4x4::create_rotation_y(180.0f32.to_radians()) 
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(object_position, camera_position, camera_up_vector, Vector3::new(0f32, 0f32, 1f32), Vector3::new(0f32, 0f32, -1f32));
+    
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_too_close_test2() {
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let camera_position = object_position;
+    let camera_up_vector = Vector3::new(0.0f32, 1.0f32, 0.0);
+
+    // Passes Vector3f.Right as camera face direction. Result must be same as -90 degrees rotate along y-axis.
+    let expected = 
+        Matrix4x4::create_rotation_y(-90.0f32.to_radians()) 
+            * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position, 
+        camera_position, 
+        camera_up_vector, 
+        Vector3::new(1f32, 0f32, 0f32), 
+        Vector3::new(0f32, 0f32, -1f32));
+
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_along_axis_test1() {
+    // Place camera at up side of object.
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let rotate_axis = Vector3::new(0.0f32, 1.0f32, 0.0);
+    let camera_position = object_position + rotate_axis * 10.0f32;
+
+    // In this case, CreateConstrainedBillboard picks new Vector3f(0f32, 0f32, -1) as object forward vector.
+    let expected = Matrix4x4::create_rotation_y(180.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position,
+        camera_position,
+        rotate_axis,
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+// A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
+// Angle between rotateAxis and camera to object vector is too small. And user doesn't passed objectForwardVector parameter.
+#[test]
+fn matrix4x4_create_constrained_billboard_along_axis_test2() {
+    // Place camera at up side of object.
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let rotate_axis = Vector3::new(0.0f32, 0.0f32, -1.0);
+    let camera_position = object_position + rotate_axis * 10.0f32;
+
+    // In this case, CreateConstrainedBillboard picks new Vector3f(1, 0f32, 0) as object forward vector.
+    let expected = Matrix4x4::create_rotation_x(-90.0f32.to_radians())
+        * Matrix4x4::create_rotation_z(-90.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position,
+        camera_position,
+        rotate_axis,
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(1.0f32, 0.0f32, 0.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+
+#[test]
+fn matrix4x4_create_constrained_billboard_along_axis_test3() {
+    // Place camera at up side of object.
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let rotate_axis = Vector3::new(0.0f32, 1.0f32, 0.0);
+    let camera_position = object_position + rotate_axis * 10.0f32;
+
+    // User passes correct object_forward_vector.
+    let expected = Matrix4x4::create_rotation_y(180.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position,
+        camera_position,
+        rotate_axis,
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(0.0f32, 0.0f32, -1.0)
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_along_axis_test4() {
+    // Place camera at up side of object.
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let rotate_axis = Vector3::new(0.0f32, 1.0f32, 0.0);
+    let camera_position = object_position + rotate_axis * 10.0f32;
+
+    // User passes incorrect object_forward_vector.
+    let expected = Matrix4x4::create_rotation_y(180.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position,
+        camera_position,
+        rotate_axis,
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(0.0f32, 1.0f32, 0.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5), "Matrix4x4::create_constrained_billboard did not return the expected value.");
+}
+
+#[test]
+fn matrix4x4_create_constrained_billboard_along_axis_test5() {
+    // Place camera at up side of object.
+    let object_position = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let rotate_axis = Vector3::new(0.0f32, 0.0f32, -1.0);
+    let camera_position = object_position + rotate_axis * 10.0f32;
+
+    // In this case, create_constrained_billboard picks Vector3::new(1.0f32, 0.0f32, 0.0) as object forward vector.
+    let expected = Matrix4x4::create_rotation_x(-90.0f32.to_radians())
+        * Matrix4x4::create_rotation_z(-90.0f32.to_radians())
+        * Matrix4x4::create_translation(object_position);
+    let actual = Matrix4x4::create_constrained_billboard(
+        object_position,
+        camera_position,
+        rotate_axis,
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+        Vector3::new(0.0f32, 0.0f32, -1.0),
+    );
+    assert!(expected.almost_equals(&actual, 1e-5));
+}
+
+// A test for CreateScale (Vector3f)
+#[test]
+fn matrix4x4_create_scale_test1() {
+    let scales = Vector3::new(2.0f32, 3.0f32, 4.0);
+    let expected = Matrix4x4::new(
+        2.0f32, 0.0f32, 0.0f32, 0.0,
+        0.0f32, 3.0f32, 0.0f32, 0.0,
+        0.0f32, 0.0f32, 4.0f32, 0.0,
+        0.0f32, 0.0f32, 0.0f32, 1.0,
+    );
+    let actual = Matrix4x4::create_scale(scales);
+    assert_eq!(expected, actual);
+}
+
+// A test for CreateScale (Vector3f, Vector3f)
+#[test]
+fn matrix4x4_create_scale_center_test1() {
+    let scale = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let center = Vector3::new(23.0f32, 42.0f32, 666.0);
+
+    let scale_around_zero = Matrix4x4::create_scale_centered(scale, Vector3::zero());
+    let scale_around_zero_expected = Matrix4x4::create_scale(scale);
+    assert_eq!(scale_around_zero, scale_around_zero_expected);
+
+    let scale_around_center = Matrix4x4::create_scale_centered(scale, center);
+    let scale_around_center_expected =
+        Matrix4x4::create_translation(-center) * 
+        Matrix4x4::create_scale(scale) * 
+        Matrix4x4::create_translation(center);
+    assert_eq!(scale_around_center, scale_around_center_expected);
+}
+
+// A test for CreateScale (float)
+#[test]
+fn matrix4x4_create_scale_test2() {
+    let scale = 2.0f32;
+    let expected = Matrix4x4::new(
+        2.0f32, 0.0f32, 0.0f32, 0.0,
+        0.0f32, 2.0f32, 0.0f32, 0.0,
+        0.0f32, 0.0f32, 2.0f32, 0.0,
+        0.0f32, 0.0f32, 0.0f32, 1.0,
+    );
+    let actual = Matrix4x4::create_scale_uniform(scale);
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn matrix4x4_create_scale_center_test2() {
+    let scale = 5.0f32;
+    let center = Vector3::new(23.0f32, 42.0f32, 666.0);
+
+    let scale_around_zero = Matrix4x4::create_scale_uniform_centered(scale, Vector3::zero());
+    let scale_around_zero_expected = Matrix4x4::create_scale_uniform(scale);
+    assert_eq!(scale_around_zero, scale_around_zero_expected);
+
+    let scale_around_center = Matrix4x4::create_scale_uniform_centered(scale, center);
+    let scale_around_center_expected =
+        Matrix4x4::create_translation(-center) * 
+        Matrix4x4::create_scale_uniform(scale) * 
+        Matrix4x4::create_translation(center);
+        assert_eq!(scale_around_center, scale_around_center_expected);
+}
+
+#[test]
+fn matrix4x4_create_scale_test3() {
+    let x_scale = 2.0f32;
+    let y_scale = 3.0f32;
+    let z_scale = 4.0f32;
+    let expected = Matrix4x4::new(
+        x_scale, 0.0f32, 0.0f32, 0.0,
+        0.0f32, y_scale, 0.0f32, 0.0,
+        0.0f32, 0.0f32, z_scale, 0.0,
+        0.0f32, 0.0f32, 0.0f32, 1.0,
+    );
+    let actual = Matrix4x4::create_scale_xyz(x_scale, y_scale, z_scale);
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn matrix4x4_create_scale_center_test3() {
+    let scale = Vector3::new(3.0f32, 4.0f32, 5.0);
+    let center = Vector3::new(23.0f32, 42.0f32, 666.0);
+
+    let scale_around_zero = Matrix4x4::create_scale_xyz_center(scale.x, scale.y, scale.z, Vector3::zero());
+    let scale_around_zero_expected = Matrix4x4::create_scale_xyz(scale.x, scale.y, scale.z);
+    assert_eq!(scale_around_zero, scale_around_zero_expected);
+
+    let scale_around_center = Matrix4x4::create_scale_xyz_center(scale.x, scale.y, scale.z, center);
+    let scale_around_center_expected =
+        Matrix4x4::create_translation(-center) * 
+        Matrix4x4::create_scale_xyz(scale.x, scale.y, scale.z) * 
+        Matrix4x4::create_translation(center);
+    assert_eq!(scale_around_center, scale_around_center_expected);
+}
+
+#[test]
+fn matrix4x4_create_translation_test1() {
+    let position = Vector3::new(2.0f32, 3.0f32, 4.0);
+    let expected = Matrix4x4::new(
+        1.0f32, 0.0f32, 0.0f32, 0.0,
+        0.0f32, 1.0f32, 0.0f32, 0.0,
+        0.0f32, 0.0f32, 1.0f32, 0.0,
+        2.0f32, 3.0f32, 4.0f32, 1.0,
+    );
+
+    let actual = Matrix4x4::create_translation(position);
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn matrix4x4_create_translation_test2() {
+    let x_position = 2.0f32;
+    let y_position = 3.0f32;
+    let z_position = 4.0f32;
+
+    let expected = Matrix4x4::new(
+        1.0f32, 0.0f32, 0.0f32, 0.0,
+        0.0f32, 1.0f32, 0.0f32, 0.0,
+        0.0f32, 0.0f32, 1.0f32, 0.0,
+        2.0f32, 3.0f32, 4.0f32, 1.0,
+    );
+
+    let actual = Matrix4x4::create_translation_xyz(x_position, y_position, z_position);
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn matrix4x4_translation_test() {
+    let mut a = generate_test_matrix();
+    let b = a;
+
+    // Transformed vector that has same semantics of property must be same.
+    let val = Vector3::new(a.m41, a.m42, a.m43);
+    assert_eq!(val, a.translation());
+
+    // Set value and get value must be same.
+    let val = Vector3::new(1.0f32, 2.0f32, 3.0);
+    a = a.set_translation(val);
+    assert_eq!(val, a.translation());
+
+    // Make sure it only modifies expected value of matrix.
+    assert!(a.m11 == b.m11 && a.m12 == b.m12 && a.m13 == b.m13 && a.m14 == b.m14
+        && a.m21 == b.m21 && a.m22 == b.m22 && a.m23 == b.m23 && a.m24 == b.m24
+        && a.m31 == b.m31 && a.m32 == b.m32 && a.m33 == b.m33 && a.m34 == b.m34
+        && a.m41 != b.m41 && a.m42 != b.m42 && a.m43 != b.m43 && a.m44 == b.m44);
+}
+
+#[test]
+fn matrix4x4_equals_test1() {
+    let a = generate_matrix_number_from_1_to_16();
+    let mut b = generate_matrix_number_from_1_to_16();
+
+    // case 1: compare between same values
+    let expected = true;
+    let actual = a.eq(&b);
+    assert_eq!(expected, actual);
+
+    // case 2: compare between different values
+    b.m11 = 11.0;
+    let expected = false;
+    let actual = a.eq(&b);
+    assert_eq!(expected, actual);
+}
+
+#[test]
+fn matrix4x4_is_identity_test() {
+    assert!(Matrix4x4::<f32>::identity().is_identity());
+    assert!(Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 1f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 1f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 1f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 1f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 1f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 1f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 1f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 1f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 1f32, 0f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 1f32, 0f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 1f32, 0f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 1f32, 1f32).is_identity());
+    assert!(!Matrix4x4::<f32>::new(1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 1f32, 0f32, 0f32, 0f32, 0f32, 0f32).is_identity());
+}
+
+#[test]
+fn matrix4x4_equals_nan_test()
+{
+    let a = Matrix4x4::<f32>::new(f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let b = Matrix4x4::<f32>::new(0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let c = Matrix4x4::<f32>::new(0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let d = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let e = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let f = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let g = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let h = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let i = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let j = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let k = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32, 0f32);
+    let l = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32, 0f32);
+    let m = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32, 0f32);
+    let n = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32, 0f32);
+    let o = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN, 0f32);
+    let p = Matrix4x4::<f32>::new(0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32, f32::NAN);
+
+    assert!(!(a == Matrix4x4::<f32>::zero()));
+    assert!(!(b == Matrix4x4::<f32>::zero()));
+    assert!(!(c == Matrix4x4::<f32>::zero()));
+    assert!(!(d == Matrix4x4::<f32>::zero()));
+    assert!(!(e == Matrix4x4::<f32>::zero()));
+    assert!(!(f == Matrix4x4::<f32>::zero()));
+    assert!(!(g == Matrix4x4::<f32>::zero()));
+    assert!(!(h == Matrix4x4::<f32>::zero()));
+    assert!(!(i == Matrix4x4::<f32>::zero()));
+    assert!(!(j == Matrix4x4::<f32>::zero()));
+    assert!(!(k == Matrix4x4::<f32>::zero()));
+    assert!(!(l == Matrix4x4::<f32>::zero()));
+    assert!(!(m == Matrix4x4::<f32>::zero()));
+    assert!(!(n == Matrix4x4::<f32>::zero()));
+    assert!(!(o == Matrix4x4::<f32>::zero()));
+    assert!(!(p == Matrix4x4::<f32>::zero()));
+
+    assert!((a != Matrix4x4::<f32>::zero()));
+    assert!((b != Matrix4x4::<f32>::zero()));
+    assert!((c != Matrix4x4::<f32>::zero()));
+    assert!((d != Matrix4x4::<f32>::zero()));
+    assert!((e != Matrix4x4::<f32>::zero()));
+    assert!((f != Matrix4x4::<f32>::zero()));
+    assert!((g != Matrix4x4::<f32>::zero()));
+    assert!((h != Matrix4x4::<f32>::zero()));
+    assert!((i != Matrix4x4::<f32>::zero()));
+    assert!((j != Matrix4x4::<f32>::zero()));
+    assert!((k != Matrix4x4::<f32>::zero()));
+    assert!((l != Matrix4x4::<f32>::zero()));
+    assert!((m != Matrix4x4::<f32>::zero()));
+    assert!((n != Matrix4x4::<f32>::zero()));
+    assert!((o != Matrix4x4::<f32>::zero()));
+    assert!((p != Matrix4x4::<f32>::zero()));
+  
+    assert!(!(a.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(b.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(c.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(d.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(e.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(f.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(g.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(h.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(i.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(j.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(k.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(l.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(m.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(n.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(o.eq(&Matrix4x4::<f32>::zero())));
+    assert!(!(p.eq(&Matrix4x4::<f32>::zero())));
+
+    assert!(!(a.is_identity()));
+    assert!(!(b.is_identity()));
+    assert!(!(c.is_identity()));
+    assert!(!(d.is_identity()));
+    assert!(!(e.is_identity()));
+    assert!(!(f.is_identity()));
+    assert!(!(g.is_identity()));
+    assert!(!(h.is_identity()));
+    assert!(!(i.is_identity()));
+    assert!(!(j.is_identity()));
+    assert!(!(k.is_identity()));
+    assert!(!(l.is_identity()));
+    assert!(!(m.is_identity()));
+    assert!(!(n.is_identity()));
+    assert!(!(o.is_identity()));
+    assert!(!(p.is_identity()));
+
+    // Counterintuitive result - IEEE rules for NaN comparison are weird!
+    assert!(!(a.eq(&a)));
+    assert!(!(b.eq(&b)));
+    assert!(!(c.eq(&c)));
+    assert!(!(d.eq(&d)));
+    assert!(!(e.eq(&e)));
+    assert!(!(f.eq(&f)));
+    assert!(!(g.eq(&g)));
+    assert!(!(h.eq(&h)));
+    assert!(!(i.eq(&i)));
+    assert!(!(j.eq(&j)));
+    assert!(!(k.eq(&k)));
+    assert!(!(l.eq(&l)));
+    assert!(!(m.eq(&m)));
+    assert!(!(n.eq(&n)));
+    assert!(!(o.eq(&o)));
+    assert!(!(p.eq(&p)));
+}
+
+#[test]
+fn perspective_far_plane_at_infinity_test() {
+    let near_plane_distance = 0.125f32;
+    let m = Matrix4x4::create_perspective(1.0f32, 1.0, near_plane_distance, f32::INFINITY);
+    assert!(equal(-1.0f32, m.m33));
+    assert!(equal(-near_plane_distance, m.m43));
+}
+
+#[test]
+fn perspective_field_of_view_far_plane_at_infinity_test() {
+    let near_plane_distance = 0.125f32;
+    let m = Matrix4x4::create_perspective_field_of_view(
+        60.0f32.to_radians(),
+        1.5f32,
+        near_plane_distance,
+        f32::INFINITY,
+    );
+    assert!(equal(-1.0, m.m33));
+    assert!(equal(-near_plane_distance, m.m43));
+}
+
+#[test]
+fn perspective_off_center_far_plane_at_infinity_test() {
+    let near_plane_distance = 0.125f32;
+    let m = Matrix4x4::create_perspective_off_center(
+        0.0f32,
+        1.0,
+        1.0,
+        0.0,
+        near_plane_distance,
+        f32::INFINITY,
+    );
+    assert!(equal(-1.0, m.m33));
+    assert!(equal(-near_plane_distance, m.m43));
 }
