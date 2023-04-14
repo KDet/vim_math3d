@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub, AddAssign};
-use num_traits::{Float, Zero, One };
+use num_traits::{Float, Zero, One, FloatConst };
 use std::hash::Hash;
 
 use vim_math3d_macro_derive::{StructOps, VectorOps, IntervalOps, VectorComponentOps, VectorOperators};
@@ -369,7 +369,7 @@ impl<T: Float> Vector4<T> {
     pub fn from_vector2(v: Vector2<T>) -> Self { Self::new(v.x, v.y, T::zero(), T::zero()) }
 }
 
-impl<T: Float> Transformable3D<T> for Vector4<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Vector4<T> {
     type Output = Self;
 
     #[inline(always)]
@@ -383,7 +383,7 @@ impl<T: Float> Transformable3D<T> for Vector4<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Vector3<T> {
+impl<T: Float + FloatConst + PartialOrd> Vector3<T> {
     #[inline(always)]
     pub fn new_from_xy(x: T, y: T) -> Self { Self { x, y, z: T::zero() } }
     #[inline(always)]
@@ -558,7 +558,7 @@ impl<T: Float + PartialOrd> Vector3<T> {
    
 }
 
-impl<T: Float> Transformable3D<T> for Vector3<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Vector3<T> {
     type Output = Self;
 
     /// Transforms a vector by the given matrix.
@@ -602,7 +602,7 @@ impl<T: Float> Points<T> for Line<T> {
     fn get_point(&self, n: usize) -> Vector3<T> { if n == 0 { self.a } else { self.b } }
 }
 
-impl<T: Float> Transformable3D<T> for Line<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Line<T> {
     type Output = Self;
 
     #[inline(always)]
@@ -699,7 +699,7 @@ impl<T: Float> Vector2<T> {
     
 }
 
-impl<T: Float + AddAssign> Transformable3D<T> for Vector2<T> {
+impl<T: Float + FloatConst + AddAssign> Transformable3D<T> for Vector2<T> {
     type Output = Self;
     /// Transforms the box by a 4x4 matrix.
     fn transform(&self, matrix: Matrix4x4<T>) -> Self {
@@ -756,7 +756,7 @@ impl<T: Float> Line2D<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Transform<T> {
+impl<T: Float + FloatConst + PartialOrd> Transform<T> {
     pub fn identity(&self) -> Self {
         Self { position: Vector3::<T>::zero(), orientation: Quaternion::<T>::identity() }
     }
@@ -1108,7 +1108,7 @@ impl<T: Float + AddAssign> AABox<T> {
     }
 }
 
-impl<T: Float + AddAssign> Transformable3D<T> for AABox<T> {
+impl<T: Float + FloatConst + AddAssign> Transformable3D<T> for AABox<T> {
     type Output = Self;
     /// Transforms the box by a 4x4 matrix.
     fn transform(&self, mat: Matrix4x4<T>) -> Self {
@@ -1207,7 +1207,7 @@ impl<T: Float> AABox2D<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Quaternion<T> {
+impl<T: Float + FloatConst + PartialOrd<T>> Quaternion<T> {
     /// Returns a Quaternion representing no rotation. 
     pub fn identity() -> Self { Self { x: T::zero(), y: T::zero(), z: T::zero(), w: T::one() } }
     /// Returns whether the Quaternion is the identity Quaternion.
@@ -1575,7 +1575,7 @@ impl<T: Float> Mul<T> for Quaternion<T> {
     }
 }
 
-impl<T: Float> Div for Quaternion<T> {
+impl<T: Float + FloatConst> Div for Quaternion<T> {
     type Output = Self;
     /// Divides a Quaternion by another Quaternion.
     fn div(self, rhs: Self) -> Self::Output {
@@ -1583,16 +1583,16 @@ impl<T: Float> Div for Quaternion<T> {
     }
 }
 
-impl<T: Float + PartialOrd> From<HorizontalCoordinate<T>> for Quaternion<T> {
+impl<T: Float + FloatConst + PartialOrd> From<HorizontalCoordinate<T>> for Quaternion<T> {
     fn from(angle: HorizontalCoordinate<T>) -> Self { Self::new_from_horizontal_coordinate(angle) }
 }
 
-impl<T: Float + PartialOrd> From<Quaternion<T>> for HorizontalCoordinate<T> {
+impl<T: Float + FloatConst + PartialOrd> From<Quaternion<T>> for HorizontalCoordinate<T> {
     fn from(q: Quaternion<T>) -> Self {  q.to_spherical_angle()  }
 }
 
 
-impl<T: Float + PartialOrd> Plane<T> {
+impl<T: Float + FloatConst + PartialOrd> Plane<T> {
     #[inline(always)]
     pub fn new_from_coordinates(x: T, y: T, z: T, d: T) -> Self {
         Self { normal: Vector3 { x, y, z }, d }
@@ -1700,7 +1700,7 @@ impl<T: Float + PartialOrd> Plane<T> {
 
 }
 
-impl<T: Float> Transformable3D<T> for Plane<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Plane<T> {
     type Output = Self;
 
     /// Transforms a vector by the given matrix.
@@ -1721,7 +1721,7 @@ impl<T: Float> Transformable3D<T> for Plane<T> {
     }
 }
 
-impl<T: Float> Transformable3D<T> for Quad<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Quad<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -1750,7 +1750,7 @@ impl<T: Float> Points<T> for Quad<T> {
     }
 }
 
-impl<T: Float + AddAssign<T> + PartialOrd> Sphere<T> {
+impl<T: Float + FloatConst + AddAssign<T> + PartialOrd> Sphere<T> {
     /// Test if a bounding box is fully inside, outside, or just intersecting the sphere.
     pub fn contains_box(&self, aabox: &AABox<T>) -> ContainmentType {
         let mut inside = true;
@@ -1940,7 +1940,7 @@ impl<T: Float + AddAssign<T> + PartialOrd> Sphere<T> {
 
 }
 
-impl<T: Float> Transformable3D<T> for Sphere<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Sphere<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -1956,7 +1956,7 @@ impl<T: Float> Transformable3D<T> for Sphere<T> {
 
 // Assuming necessary struct and function definitions for AABox, Plane, Sphere, Triangle, Ray, Vector3, and Matrix4x4
 
-impl<T: Float + PartialOrd> Ray<T> {
+impl<T: Float + FloatConst + PartialOrd> Ray<T> {
     #[inline(always)]
     pub fn intersects_box(&self, aabox: &AABox<T>) -> Option<T> {
         let mut t_min = None;
@@ -2069,7 +2069,7 @@ impl<T: Float + PartialOrd> Ray<T> {
 
 }
 
-impl<T: Float> Transformable3D<T> for Ray<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Ray<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -2080,7 +2080,7 @@ impl<T: Float> Transformable3D<T> for Ray<T> {
     }
 }
 
-impl<T: Float + AddAssign + PartialOrd> Triangle<T> {
+impl<T: Float + FloatConst + AddAssign + PartialOrd> Triangle<T> {
     pub fn length_a(&self) -> T { self.a.distance(self.b) }
     pub fn length_b(&self) -> T { self.b.distance(self.c) }
     pub fn length_c(&self) -> T { self.c.distance(self.a)}
@@ -2120,7 +2120,7 @@ impl<T: Float + AddAssign + PartialOrd> Triangle<T> {
     pub fn ac(&self) -> Line<T> { self.ca().inverse() }
 }
 
-impl<T: Float> Transformable3D<T> for Triangle<T> {
+impl<T: Float + FloatConst> Transformable3D<T> for Triangle<T> {
     type Output = Self;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output {
@@ -2195,7 +2195,7 @@ impl<T: Float> Points2D<T> for Triangle2D<T> {
 
 
 
-impl<T: Float + PartialOrd> Transform<T> {
+impl<T: Float + FloatConst + PartialOrd<T>> Transform<T> {
     pub fn to_matrix(&self) -> Matrix4x4<T> { Matrix4x4::create_trs(self.position, self.orientation, Vector3::one()) }
 }
 
@@ -2268,7 +2268,7 @@ impl<T: std::fmt::Debug> std::fmt::Display for Stats<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Matrix4x4<T> {
+impl<T: Float + FloatConst + PartialOrd<T>> Matrix4x4<T> {
     pub fn col0(&self) -> Vector3<T> { Vector3::new(self.m11, self.m21, self.m31) }
     pub fn col1(&self) -> Vector3<T> { Vector3::new(self.m12, self.m22, self.m32) }
     pub fn col2(&self) -> Vector3<T> { Vector3::new(self.m13, self.m23, self.m33) }
@@ -2535,7 +2535,11 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     pub fn create_rotation_x(radians: T) -> Self {
         let c = radians.cos();
         let s = radians.sin();
-    
+        
+        // [  1  0  0  0 ]
+        // [  0  c  s  0 ]
+        // [  0 -s  c  0 ]
+        // [  0  0  0  1 ]    
         Self {
             m11: T::one(),
             m12: T::zero(),
@@ -2560,11 +2564,14 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     pub fn create_rotation_x_centered(radians: T, center_point: Vector3<T>) -> Self {
         let c = radians.cos();
         let s = radians.sin();
-    
         let y = center_point.y * (T::one() - c) + center_point.z * s;
         let z = center_point.z * (T::one() - c) - center_point.y * s;
     
-        Matrix4x4 {
+        // [  1  0  0  0 ]
+        // [  0  c  s  0 ]
+        // [  0 -s  c  0 ]
+        // [  0  y  z  1 ]
+        Self {
             m11: T::one(),
             m12: T::zero(),
             m13: T::zero(),
@@ -2687,6 +2694,9 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
 
     /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances. 
     pub fn create_perspective_field_of_view(field_of_view: T, aspect_ratio: T, near_plane_distance: T, far_plane_distance: T) -> Self {
+        if field_of_view <= T::zero() || field_of_view >= T::PI() || near_plane_distance <= T::zero() || far_plane_distance <= T::zero() || near_plane_distance >= far_plane_distance {
+            panic!("Invalid arguments provided for create_perspective.");
+        }
         let half = T::from(0.5).unwrap();
         let y_scale = (field_of_view * half).tan().recip();
         let x_scale = y_scale / aspect_ratio;
@@ -2714,6 +2724,9 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
 
     /// Creates a perspective projection matrix from the given view volume dimensions.
     pub fn create_perspective(width: T, height: T, near_plane_distance: T, far_plane_distance: T) -> Self {
+        if near_plane_distance <= T::zero() || far_plane_distance <= T::zero() || near_plane_distance >= far_plane_distance {
+            panic!("Invalid arguments provided for create_perspective.");
+        }
         let two = T::from(2).unwrap();
         let neg_far_range = if far_plane_distance.is_infinite() { -T::one() } else { far_plane_distance / (near_plane_distance - far_plane_distance) };
 
@@ -2743,21 +2756,24 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             panic!("Invalid arguments provided for create_perspective_off_center.");
         }
         let two = T::from(2).unwrap();
-        let neg_far_range = if far_plane_distance.is_infinite() { -T::one() } else { far_plane_distance / (near_plane_distance - far_plane_distance) };
+        let neg_far_range = if far_plane_distance.is_infinite() && far_plane_distance.is_sign_positive() { -T::one() } else { far_plane_distance / (near_plane_distance - far_plane_distance) };
     
         Self::new(
             two * near_plane_distance / (right - left),
             T::zero(),
-            (left + right) / (right - left),
             T::zero(),
+            T::zero(),
+
             T::zero(),
             two * near_plane_distance / (top - bottom),
+            T::zero(), 
+            T::zero(),
+
+            (left + right) / (right - left), 
             (top + bottom) / (top - bottom),
-            T::zero(),
-            T::zero(),
-            T::zero(),
             neg_far_range,
             -T::one(),
+
             T::zero(),
             T::zero(),
             near_plane_distance * neg_far_range,
@@ -2780,10 +2796,10 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             T::zero(),
             T::zero(),
             T::one() / (z_near_plane - z_far_plane),
+            T::zero(),
+            T::zero(),
+            T::zero(),
             z_near_plane / (z_near_plane - z_far_plane),
-            T::zero(),
-            T::zero(),
-            T::zero(),
             T::one(),
         )
     }
@@ -2795,18 +2811,18 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             two / (right - left),
             T::zero(),
             T::zero(),
-            (left + right) / (left - right),
+            T::zero(),
             T::zero(),
             two / (top - bottom),
             T::zero(),
-            (top + bottom) / (bottom - top),
+            T::zero(),
             T::zero(),
             T::zero(),
             T::one() / (z_near_plane - z_far_plane),
+            T::zero(),
+            (left + right) / (left - right),
+            (top + bottom) / (bottom - top),
             z_near_plane / (z_near_plane - z_far_plane),
-            T::zero(),
-            T::zero(),
-            T::zero(),
             T::one(),
         )
     }
@@ -2898,42 +2914,71 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     /// Creates a Matrix that flattens geometry into a specified Plane as if casting a shadow from a specified light source.
     pub fn create_shadow(light_direction: Vector3<T>, plane: Plane<T>) -> Self {
         let p = plane.normalize();
-    
-        let dot = p.normal.dot(light_direction);
+        let dot = p.normal.x * light_direction.x + 
+            p.normal.y * light_direction.y + 
+            p.normal.z * light_direction.z;
         let a = -p.normal.x;
         let b = -p.normal.y;
         let c = -p.normal.z;
         let d = -p.d;
     
-        Self::new(
-            a * light_direction.x + dot, b * light_direction.x, c * light_direction.x, d * light_direction.x,
-            a * light_direction.y, b * light_direction.y + dot, c * light_direction.y, d * light_direction.y,
-            a * light_direction.z, b * light_direction.z, c * light_direction.z + dot, d * light_direction.z,
-            T::zero(), T::zero(), T::zero(), dot,
-        )
+        Self {
+            m11: a * light_direction.x + dot,
+            m21: b * light_direction.x,
+            m31: c * light_direction.x,
+            m41: d * light_direction.x,
+
+            m12: a * light_direction.y,
+            m22: b * light_direction.y + dot,
+            m32: c * light_direction.y,
+            m42: d * light_direction.y,
+
+            m13: a * light_direction.z,
+            m23: b * light_direction.z,
+            m33: c * light_direction.z + dot,
+            m43: d * light_direction.z,
+
+            m14: T::zero(),
+            m24: T::zero(),
+            m34: T::zero(),
+            m44: dot,
+        }
     }
     
     /// Creates a Matrix that reflects the coordinate system about a specified Plane.
     pub fn create_reflection(value: Plane<T>) -> Self {
+        let two = T::from(2.0f32).unwrap();
         let value = value.normalize();
     
         let a = value.normal.x;
         let b = value.normal.y;
         let c = value.normal.z;
     
-        let fa = -T::one() - T::one();
-        let fb = -T::one() - T::one();
-        let fc = -T::one() - T::one();
+        let fa = -two * a;
+        let fb = -two * b;
+        let fc = -two * c;
     
-        let zero = T::zero();
-        let one = T::one();
-    
-        Self::new(
-            fa * a + one, fb * a, fc * a, zero,
-            fa * b, fb * b + one, fc * b, zero,
-            fa * c, fb * c, fc * c + one, zero,
-            fa * value.d, fb * value.d, fc * value.d, one,
-        )
+        Self {
+            m11: fa * a + T::one(),
+            m12: fb * a,
+            m13: fc * a,
+            m14: T::zero(),
+
+            m21: fa * b,
+            m22: fb * b + T::one(),
+            m23: fc * b,
+            m24: T::zero(),
+
+            m31: fa * c,
+            m32: fb * c,
+            m33: fc * c + T::one(),
+            m34: T::zero(),
+
+            m41: fa * value.d,
+            m42: fb * value.d,
+            m43: fc * value.d,
+            m44: T::one(),
+        }
     }
     
     /// Calculates the determinant of the 3x3 rotational component of the matrix.
@@ -3283,10 +3328,10 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
     /// Attempts to extract the scale, translation, and rotation components from the given scale/rotation/translation matrix.
     /// If successful, the out parameters will contained the extracted values.
     /// https://referencesource.microsoft.com/#System.Numerics/System/Numerics/Matrix4x4.cs
-    pub fn decompose(matrix: &Self) -> Option<(Vector3<T>, Quaternion<T>, Vector3<T>)> {
+    pub fn decompose(&self) -> Option<(Vector3<T>, Quaternion<T>, Vector3<T>)> {
         let epsilon: T = T::from(0.0001).unwrap();
         let p_canonical_basis = [ Vector3::<T>::unit_x(), Vector3::<T>::unit_y(), Vector3::<T>::unit_z() ];
-        let mut p_vector_basis = [ matrix.row0(), matrix.row1(), matrix.row2() ];
+        let mut p_vector_basis = [ self.row0(), self.row1(), self.row2() ];
         let mut pf_scales = [ p_vector_basis[0].length(), p_vector_basis[1].length(), p_vector_basis[2].length() ];
         
         let x = pf_scales[0];
@@ -3361,7 +3406,7 @@ impl<T: Float + PartialOrd> Matrix4x4<T> {
             p_vector_basis[1],
             p_vector_basis[2],
         ));
-        let translation = matrix.translation();
+        let translation = self.translation();
         let scale = Vector3::new(pf_scales[0], pf_scales[1], pf_scales[2]);
         return Some((scale, rotation, translation))
     }
@@ -3469,6 +3514,19 @@ impl<T: Float + Add<Output = T>> Add for Matrix4x4<T> {
     }
 }
 
+impl<T: Float + Sub<Output = T>> Sub for Matrix4x4<T> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Self {
+            m11: self.m11 - other.m11, m12: self.m12 - other.m12, m13: self.m13 - other.m13, m14: self.m14 - other.m14,
+            m21: self.m21 - other.m21, m22: self.m22 - other.m22, m23: self.m23 - other.m23, m24: self.m24 - other.m24,
+            m31: self.m31 - other.m31, m32: self.m32 - other.m32, m33: self.m33 - other.m33, m34: self.m34 - other.m34,
+            m41: self.m41 - other.m41, m42: self.m42 - other.m42, m43: self.m43 - other.m43, m44: self.m44 - other.m44,
+        }
+    }
+}
+
 impl<T: Float> std::ops::Mul for Matrix4x4<T> {
     type Output = Self;
 
@@ -3522,7 +3580,14 @@ impl<T: Float> Mul<T> for Matrix4x4<T> {
     }
 }
 
- 
+// impl<T: PartialEq + Hash> std::hash::Hash for Matrix4x4<T> {
+//     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+//         self.count.hash(state);
+//         self.min.hash(state);
+//         self.max.hash(state);
+//         self.sum.hash(state);
+//     }
+// } 
 
 // impl<T: Float> PartialEq for Matrix4x4<T> {
 //     fn eq(&self, other: &Self) -> bool {

@@ -38,8 +38,6 @@ fn vector3_get_hash_code_test() {
     assert_ne!(hash_code(&v8), hash_code(&v6));
     assert_ne!(hash_code(&v8), hash_code(&v9));
     assert_ne!(hash_code(&v7), hash_code(&v9));
-
- 
 }
 
 #[test]

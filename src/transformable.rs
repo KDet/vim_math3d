@@ -1,4 +1,4 @@
-use num_traits::Float;
+use num_traits::{Float, FloatConst};
 use crate::{Vector2,Vector3,Matrix4x4, Quaternion, Plane};
 
 pub trait Points<T: Float> {
@@ -19,7 +19,7 @@ pub trait Mappable<TPart> {
         F: Fn(TPart) -> TPart;
 }
 
-pub trait Transformable3D<T: Float> {
+pub trait Transformable3D<T: Float + FloatConst> {
     type Output: Transformable3D<T, Output = Self::Output>;
 
     fn transform(&self, mat: Matrix4x4<T>) -> Self::Output;
