@@ -1,4 +1,4 @@
-# 🚀 **Vim.Math3D C++ Translation**
+# 🚀 **Open-source translation of Vim.Math3D library**
 
 This repository contains translations of the **Vim.Math3D** library from C# to other languages. [The original library](https://github.com/vimaec/Math3D) was designed for .NET Standard 2.0 and developed by the VIM team for high-performance 3D applications. 
 
