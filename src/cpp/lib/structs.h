@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include <iostream>
-#include <vector>
-#include <array>
-#include <numeric>
-#include <functional>
-#include <initializer_list>
+#include <cmath>
+#include <climits>
+#include <cfloat>
+#include <cstdint>
+#include <ostream>
+#include <stdexcept>
 #include <optional>
-#include <cassert>
+#include <functional>
 
 #include "constants.h"
 #include "hash.h"
@@ -22,7 +22,7 @@ namespace vim::math3d {
         /// <summary>
         /// Calculate the nearest power of 2 from the input number
         /// </summary>
-        template <typename T = std::int32_t>
+        template <typename T = int32_t>
         inline typename std::enable_if<std::is_arithmetic<T>::value, T>::type
             toNearestPowOf2(T x) { return (T)(std::pow((T)2, std::round(std::log(x) / std::log(2)))); }
 
@@ -99,8 +99,8 @@ namespace vim::math3d {
 
     template<typename TVector>
     struct Points {
-        virtual std::size_t numPoints() const = 0;
-        virtual TVector getPoint(std::size_t n) const = 0;
+        virtual size_t numPoints() const = 0;
+        virtual TVector getPoint(size_t n) const = 0;
     };
 
     //template<typename TSelf, typename TMatrix4x4>
@@ -110,12 +110,12 @@ namespace vim::math3d {
 
     template <typename T = float>
     struct Stats final {
-        std::size_t Count;
+        size_t Count;
         T Min;
         T Max;
         T Sum;
 
-        Stats(std::size_t count, T min, T max, T sum) : Count(count), Min(min), Max(max), Sum(sum) {}
+        Stats(size_t count, T min, T max, T sum) : Count(count), Min(min), Max(max), Sum(sum) {}
 
         inline T average() const { return Sum / Count; }
         inline T extents() const { return Max - Min; }
@@ -123,7 +123,7 @@ namespace vim::math3d {
 
         template <typename Container>
         inline static Stats<typename Container::value_type> stats(const Container& self) {
-            using T = typename Container::value_type;
+            // using K = typename Container::value_type;
             Stats<T> result = Stats<T>(0, T(), T(), T());
             for (const auto& elem : self) {
                 result.Count += 1;
@@ -146,7 +146,7 @@ namespace vim::math3d {
         template <typename Container>
         inline static typename Container::value_type middle(const Container& self) { return stats(self).middle(); }
 
-        inline std::size_t hash() const { return hash::combine(Count, Min, Max, Sum); }
+        inline size_t hash() const { return hash::combine(Count, Min, Max, Sum); }
 
         inline friend bool operator==(const Stats<T>& s, const Stats<T>& other) { return s.Count == other.Count && s.Min == other.Min && s.Max == other.Max && s.Sum == other.Sum; }
         inline friend bool operator!=(const Stats<T>& s, const Stats<T>& other) { return !(s == other); }
@@ -157,20 +157,20 @@ namespace vim::math3d {
     enum class PlaneIntersectionType { front, back, intersecting };
 
     struct Byte2 final {
-        std::uint8_t X;
-        std::uint8_t Y;
+        uint8_t X;
+        uint8_t Y;
 
-        Byte2(std::uint8_t x, std::uint8_t y) : X(x), Y(y) {}
-        Byte2(std::uint8_t value) : X(value), Y(value) {}
+        Byte2(uint8_t x, uint8_t y) : X(x), Y(y) {}
+        Byte2(uint8_t value) : X(value), Y(value) {}
 
         inline static const Byte2 zero() { return Byte2(0); }
         inline static const Byte2 minValue() { return Byte2(0); }
         inline static const Byte2 maxValue() { return Byte2(UCHAR_MAX); }
 
-        inline Byte2 setX(std::uint8_t x) const { return Byte2(x, Y); }
-        inline Byte2 setY(std::uint8_t y) const { return Byte2(X, y); }
+        inline Byte2 setX(uint8_t x) const { return Byte2(x, Y); }
+        inline Byte2 setY(uint8_t y) const { return Byte2(X, y); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y); } //(Y)
+        inline size_t hash() const { return hash::combine(X, Y); } //(Y)
         inline bool almostEquals(const Byte2& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) < tolerance && std::fabs(Y - x.Y) < tolerance;
         }
@@ -181,22 +181,22 @@ namespace vim::math3d {
     };
 
     struct Byte3 final {
-        std::uint8_t X;
-        std::uint8_t Y;
-        std::uint8_t Z;
+        uint8_t X;
+        uint8_t Y;
+        uint8_t Z;
 
-        Byte3(std::uint8_t x, std::uint8_t y, std::uint8_t z) : X(x), Y(y), Z(z) {}
-        Byte3(std::uint8_t value) : X(value), Y(value), Z(value) {}
+        Byte3(uint8_t x, uint8_t y, uint8_t z) : X(x), Y(y), Z(z) {}
+        Byte3(uint8_t value) : X(value), Y(value), Z(value) {}
 
         inline static const Byte3 zero() { return Byte3(0); }
         inline static const Byte3 minValue() { return Byte3(0); }
         inline static const Byte3 maxValue() { return Byte3(UCHAR_MAX); }
 
-        inline Byte3 setX(std::uint8_t x) const { return Byte3(x, Y, Z); }
-        inline Byte3 setY(std::uint8_t y) const { return Byte3(X, y, Z); }
-        inline Byte3 setZ(std::uint8_t z) const { return Byte3(X, Y, z); }
+        inline Byte3 setX(uint8_t x) const { return Byte3(x, Y, Z); }
+        inline Byte3 setY(uint8_t y) const { return Byte3(X, y, Z); }
+        inline Byte3 setZ(uint8_t z) const { return Byte3(X, Y, z); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z); }
+        inline size_t hash() const { return hash::combine(X, Y, Z); }
         inline bool almostEquals(const Byte3& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) < tolerance && std::fabs(Y - x.Y) < tolerance && std::fabs(Z - x.Z) < tolerance;
         }
@@ -207,24 +207,24 @@ namespace vim::math3d {
     };
 
     struct Byte4 final {
-        std::uint8_t X;
-        std::uint8_t Y;
-        std::uint8_t Z;
-        std::uint8_t W;
+        uint8_t X;
+        uint8_t Y;
+        uint8_t Z;
+        uint8_t W;
 
-        Byte4(std::uint8_t x, std::uint8_t y, std::uint8_t z, std::uint8_t w) : X(x), Y(y), Z(z), W(w) {}
-        Byte4(std::uint8_t value) : X(value), Y(value), Z(value), W(value) {}
+        Byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w) : X(x), Y(y), Z(z), W(w) {}
+        Byte4(uint8_t value) : X(value), Y(value), Z(value), W(value) {}
 
         inline static const Byte4 zero() { return Byte4(0); }
         inline static const Byte4 minValue() { return Byte4(0); }
         inline static const Byte4 maxValue() { return Byte4(UCHAR_MAX); }
 
-        inline Byte4 setX(std::uint8_t x) const { return Byte4(x, Y, Z, W); }
-        inline Byte4 setY(std::uint8_t y) const { return Byte4(X, y, Z, W); }
-        inline Byte4 setZ(std::uint8_t z) const { return Byte4(X, Y, z, W); }
-        inline Byte4 setW(std::uint8_t w) const { return Byte4(X, Y, Z, w); }
+        inline Byte4 setX(uint8_t x) const { return Byte4(x, Y, Z, W); }
+        inline Byte4 setY(uint8_t y) const { return Byte4(X, y, Z, W); }
+        inline Byte4 setZ(uint8_t z) const { return Byte4(X, Y, z, W); }
+        inline Byte4 setW(uint8_t w) const { return Byte4(X, Y, Z, w); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z, W); }
+        inline size_t hash() const { return hash::combine(X, Y, Z, W); }
         inline bool almostEquals(const Byte4& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) < tolerance && std::fabs(Y - x.Y) < tolerance && std::fabs(Z - x.Z) < tolerance && std::fabs(W - x.W) < tolerance;
         }
@@ -252,7 +252,7 @@ namespace vim::math3d {
         inline ColorHDR setB(float b) const { return ColorHDR(R, G, b, A); }
         inline ColorHDR setA(float a) const { return ColorHDR(R, G, B, a); }
 
-        inline std::size_t hash() const { return hash::combine(R, G, B, A); }
+        inline size_t hash() const { return hash::combine(R, G, B, A); }
         inline bool almostEquals(const ColorHDR& x, float tolerance = constants::tolerance) const {
             return std::fabs(R - x.R) < tolerance && std::fabs(G - x.G) < tolerance
                 && std::fabs(B - x.B) < tolerance && std::fabs(A - x.A) < tolerance;
@@ -264,22 +264,22 @@ namespace vim::math3d {
     };
 
     struct ColorRGB final {
-        std::uint8_t R;
-        std::uint8_t G;
-        std::uint8_t B;
+        uint8_t R;
+        uint8_t G;
+        uint8_t B;
 
-        ColorRGB(std::uint8_t r, std::uint8_t g, std::uint8_t b) : R(r), G(g), B(b) {}
-        ColorRGB(std::uint8_t value) : R(value), G(value), B(value) {}
+        ColorRGB(uint8_t r, uint8_t g, uint8_t b) : R(r), G(g), B(b) {}
+        ColorRGB(uint8_t value) : R(value), G(value), B(value) {}
 
         inline static const ColorRGB zero() { return ColorRGB(0); }
         inline static const ColorRGB minValue() { return ColorRGB(0); }
         inline static const ColorRGB maxValue() { return ColorRGB(UCHAR_MAX); }
 
-        inline ColorRGB setR(std::uint8_t r) const { return ColorRGB(r, G, B); }
-        inline ColorRGB setG(std::uint8_t g) const { return ColorRGB(R, g, B); }
-        inline ColorRGB setB(std::uint8_t b) const { return ColorRGB(R, G, b); }
+        inline ColorRGB setR(uint8_t r) const { return ColorRGB(r, G, B); }
+        inline ColorRGB setG(uint8_t g) const { return ColorRGB(R, g, B); }
+        inline ColorRGB setB(uint8_t b) const { return ColorRGB(R, G, b); }
 
-        inline std::size_t hash() const { return hash::combine(R, G, B); }
+        inline size_t hash() const { return hash::combine(R, G, B); }
         inline bool almostEquals(const ColorRGB& x, float tolerance = constants::tolerance) const {
             return std::fabs(R - x.R) < tolerance  && std::fabs(G - x.G) < tolerance && std::fabs(B - x.B) < tolerance;
         }
@@ -290,13 +290,13 @@ namespace vim::math3d {
     };
 
     struct ColorRGBA final {
-        std::uint8_t R;
-        std::uint8_t G;
-        std::uint8_t B;
-        std::uint8_t A;
+        uint8_t R;
+        uint8_t G;
+        uint8_t B;
+        uint8_t A;
 
-        ColorRGBA(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a) : R(r), G(g), B(b), A(a) {}
-        ColorRGBA(std::uint8_t value = 0) : R(value), G(value), B(value), A(value) {}
+        ColorRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r), G(g), B(b), A(a) {}
+        ColorRGBA(uint8_t value = 0) : R(value), G(value), B(value), A(value) {}
 
         inline static const ColorRGBA zero() { return ColorRGBA(0); }
         inline static const ColorRGBA minValue() { return ColorRGBA(0); }
@@ -308,12 +308,12 @@ namespace vim::math3d {
         inline static const ColorRGBA lightBlue() { return ColorRGBA(128, 128, 255, 255); }
         inline static const ColorRGBA darkBlue() { return ColorRGBA(0, 0, 255, 255); }
 
-        inline ColorRGBA setR(std::uint8_t r) const { return ColorRGBA(r, G, B, A); }
-        inline ColorRGBA setG(std::uint8_t g) const { return ColorRGBA(R, g, B, A); }
-        inline ColorRGBA setB(std::uint8_t b) const { return ColorRGBA(R, G, b, A); }
-        inline ColorRGBA setA(std::uint8_t a) const { return ColorRGBA(R, G, B, a); }
+        inline ColorRGBA setR(uint8_t r) const { return ColorRGBA(r, G, B, A); }
+        inline ColorRGBA setG(uint8_t g) const { return ColorRGBA(R, g, B, A); }
+        inline ColorRGBA setB(uint8_t b) const { return ColorRGBA(R, G, b, A); }
+        inline ColorRGBA setA(uint8_t a) const { return ColorRGBA(R, G, B, a); }
 
-        inline std::size_t hash() const { return hash::combine(R, G, B, A); }
+        inline size_t hash() const { return hash::combine(R, G, B, A); }
         inline bool almostEquals(const ColorRGBA& x, float tolerance = constants::tolerance) const {
             return std::fabs(R - x.R) < tolerance && std::fabs(G - x.G) < tolerance
                 && std::fabs(B - x.B) < tolerance && std::fabs(A - x.A) < tolerance;
@@ -341,7 +341,7 @@ namespace vim::math3d {
         inline Complex setReal(double real) const { return Complex(real, Imaginary); }
         inline Complex setImaginary(double imaginary) const { return Complex(Real, imaginary); }
 
-        inline std::size_t hash() const { return hash::combine(Real, Imaginary); }
+        inline size_t hash() const { return hash::combine(Real, Imaginary); }
         inline bool almostEquals(const Complex& x, float tolerance = constants::tolerance) const {
             return std::fabs(Real - x.Real) <= tolerance && std::fabs(Imaginary - x.Imaginary) <= tolerance;
         }
@@ -414,7 +414,7 @@ namespace vim::math3d {
         inline Euler setPitch(T y) const { return Euler(Yaw, y, Roll); }
         inline Euler setRoll(T z) const { return Euler(Yaw, Pitch, z); }
 
-        inline std::size_t hash() const { return hash::combine((Yaw), (Pitch), (Roll)); }
+        inline size_t hash() const { return hash::combine((Yaw), (Pitch), (Roll)); }
         inline bool almostEquals(const Euler& x, float tolerance = constants::tolerance) const {
             return std::fabs(Yaw - x.Yaw) <= tolerance
                 && std::fabs(Pitch - x.Pitch) <= tolerance
@@ -473,11 +473,11 @@ namespace vim::math3d {
 #define DEuler Euler<double>
 
     struct Int2 final {
-        std::int32_t X;
-        std::int32_t Y;
+        int32_t X;
+        int32_t Y;
 
-        Int2(std::int32_t x, std::int32_t y) : X(x), Y(y) {}
-        Int2(std::int32_t value = 0) : X(value), Y(value) {}
+        Int2(int32_t x, int32_t y) : X(x), Y(y) {}
+        Int2(int32_t value = 0) : X(value), Y(value) {}
 
         inline static const Int2 zero() { return Int2(0); }
         inline static const Int2 minValue() { return Int2(INT_MIN); }
@@ -486,24 +486,24 @@ namespace vim::math3d {
         inline static const Int2 unitX() { return Int2(1, 0); }
         inline static const Int2 unitY() { return Int2(0, 1); }
 
-        inline Int2 setX(std::int32_t x) const { return Int2(x, Y); }
-        inline Int2 setY(std::int32_t y) const { return Int2(X, y); }
+        inline Int2 setX(int32_t x) const { return Int2(x, Y); }
+        inline Int2 setY(int32_t y) const { return Int2(X, y); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y); }
+        inline size_t hash() const { return hash::combine(X, Y); }
         inline bool almostEquals(const Int2& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) <= tolerance && std::fabs(Y - x.Y) <= tolerance;
         }
-        inline static std::int32_t dot(const Int2& value1, const Int2& value2) { return value1.X * value2.X + value1.Y * value2.Y; }
-        inline std::int32_t dot(const Int2& value) const { return dot(*this, value); }
+        inline static int32_t dot(const Int2& value1, const Int2& value2) { return value1.X * value2.X + value1.Y * value2.Y; }
+        inline int32_t dot(const Int2& value) const { return dot(*this, value); }
         inline bool almostZero(float tolerance = constants::tolerance) const {
             return std::fabs(X) < tolerance && std::fabs(Y) < tolerance;
         }
-        inline std::int32_t minComponent() const { return mathOps::minimum(X, Y); }
-        inline std::int32_t maxComponent() const { return mathOps::maximum(X, Y); }
-        inline std::int32_t sumComponents() const { return X + Y; }
-        inline std::int32_t sumSqrComponents() const { return X * X + Y * Y; }
-        inline std::int32_t productComponents() const { return X * Y; }
-        inline std::int32_t getComponent(int n) const { return n == 0 ? X : Y; }
+        inline int32_t minComponent() const { return mathOps::minimum(X, Y); }
+        inline int32_t maxComponent() const { return mathOps::maximum(X, Y); }
+        inline int32_t sumComponents() const { return X + Y; }
+        inline int32_t sumSqrComponents() const { return X * X + Y * Y; }
+        inline int32_t productComponents() const { return X * Y; }
+        inline int32_t getComponent(int n) const { return n == 0 ? X : Y; }
         inline double magnitudeSquared() const { return sumSqrComponents(); }
         inline double magnitude() const { return std::sqrt(magnitudeSquared()); }
         inline bool anyComponentNegative() const { return minComponent() < 0.0; }
@@ -517,20 +517,20 @@ namespace vim::math3d {
         inline friend std::ostream& operator<<(std::ostream& out, const Int2& v) { return (out << "Int2(X = " << v.X << ", Y = " << v.Y << ")"); }
         
         inline friend Int2 operator+(const Int2& lhs, const Int2& rhs) { return Int2(lhs.X + rhs.X, lhs.Y + rhs.Y); }
-        inline friend Int2 operator+(const Int2& lhs, std::int32_t rhs) { return Int2(lhs.X + rhs, lhs.Y + rhs); }
-        inline friend Int2 operator+(std::int32_t lhs, const Int2& rhs) { return Int2(lhs + rhs.X, lhs + rhs.Y); }
+        inline friend Int2 operator+(const Int2& lhs, int32_t rhs) { return Int2(lhs.X + rhs, lhs.Y + rhs); }
+        inline friend Int2 operator+(int32_t lhs, const Int2& rhs) { return Int2(lhs + rhs.X, lhs + rhs.Y); }
 
         inline friend Int2 operator-(const Int2& lhs, const Int2& rhs) { return Int2(lhs.X - rhs.X, lhs.Y - rhs.Y); }
-        inline friend Int2 operator-(const Int2& lhs, std::int32_t rhs) { return Int2(lhs.X - rhs, lhs.Y - rhs); }
-        inline friend Int2 operator-(std::int32_t lhs, const Int2& rhs) { return Int2(lhs - rhs.X, lhs - rhs.Y); }
+        inline friend Int2 operator-(const Int2& lhs, int32_t rhs) { return Int2(lhs.X - rhs, lhs.Y - rhs); }
+        inline friend Int2 operator-(int32_t lhs, const Int2& rhs) { return Int2(lhs - rhs.X, lhs - rhs.Y); }
 
         inline friend Int2 operator*(const Int2& lhs, const Int2& rhs) { return Int2(lhs.X * rhs.X, lhs.Y * rhs.Y); }
-        inline friend Int2 operator*(const Int2& lhs, std::int32_t rhs) { return Int2(lhs.X * rhs, lhs.Y * rhs); }
-        inline friend Int2 operator*(std::int32_t lhs, const Int2& rhs) { return Int2(lhs * rhs.X, lhs * rhs.Y); }
+        inline friend Int2 operator*(const Int2& lhs, int32_t rhs) { return Int2(lhs.X * rhs, lhs.Y * rhs); }
+        inline friend Int2 operator*(int32_t lhs, const Int2& rhs) { return Int2(lhs * rhs.X, lhs * rhs.Y); }
 
         inline friend Int2 operator/(const Int2& lhs, const Int2& rhs) { return Int2(lhs.X / rhs.X, lhs.Y / rhs.Y); }
-        inline friend Int2 operator/(const Int2& lhs, std::int32_t rhs) { return Int2(lhs.X / rhs, lhs.Y / rhs); }
-        inline friend Int2 operator/(std::int32_t lhs, const Int2& rhs) { return Int2(lhs / rhs.X, lhs / rhs.Y); }
+        inline friend Int2 operator/(const Int2& lhs, int32_t rhs) { return Int2(lhs.X / rhs, lhs.Y / rhs); }
+        inline friend Int2 operator/(int32_t lhs, const Int2& rhs) { return Int2(lhs / rhs.X, lhs / rhs.Y); }
 
         inline friend bool operator<(const Int2& x0, const Int2& x1) { return x0.compare(x1) < 0; }
         inline friend bool operator<=(const Int2& x0, const Int2& x1) { return x0.compare(x1) <= 0; }
@@ -539,12 +539,12 @@ namespace vim::math3d {
     };
 
     struct Int3 final {
-        std::int32_t X;
-        std::int32_t Y;
-        std::int32_t Z;
+        int32_t X;
+        int32_t Y;
+        int32_t Z;
 
-        Int3(std::int32_t x, std::int32_t y, std::int32_t z) : X(x), Y(y), Z(z) {}
-        Int3(std::int32_t value) : X(value), Y(value), Z(value) {}
+        Int3(int32_t x, int32_t y, int32_t z) : X(x), Y(y), Z(z) {}
+        Int3(int32_t value) : X(value), Y(value), Z(value) {}
 
         inline static const Int3 zero() { return Int3(0); }
         inline static const Int3 minValue() { return Int3(INT_MIN); }
@@ -554,31 +554,31 @@ namespace vim::math3d {
         inline static const Int3 unitY() { return Int3(0, 1, 0); }
         inline static const Int3 unitZ() { return Int3(0, 0, 1); }
 
-        inline Int3 setX(std::int32_t x) const { return Int3(x, Y, Z); }
-        inline Int3 setY(std::int32_t y) const { return Int3(X, y, Z); }
-        inline Int3 setZ(std::int32_t z) const { return Int3(X, Y, z); }
+        inline Int3 setX(int32_t x) const { return Int3(x, Y, Z); }
+        inline Int3 setY(int32_t y) const { return Int3(X, y, Z); }
+        inline Int3 setZ(int32_t z) const { return Int3(X, Y, z); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z); }
+        inline size_t hash() const { return hash::combine(X, Y, Z); }
         inline bool almostEquals(const Int3& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) <= tolerance
                 && std::fabs(Y - x.Y) <= tolerance
                 && std::fabs(Z - x.Z) <= tolerance;
         }
-        inline static std::int32_t dot(const Int3& value1, const Int3& value2) {
+        inline static int32_t dot(const Int3& value1, const Int3& value2) {
             return value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z;
         }
-        inline std::int32_t dot(const Int3& value) const { return dot(*this, value); }
+        inline int32_t dot(const Int3& value) const { return dot(*this, value); }
         inline bool almostZero(float tolerance = constants::tolerance) const {
             return std::fabs(X) < tolerance
                 && std::fabs(Y) < tolerance
                 && std::fabs(Z) < tolerance;
         }
-        inline std::int32_t minComponent() const { return mathOps::minimum(mathOps::minimum(X, Y), Z); }
-        inline std::int32_t maxComponent() const { return mathOps::maximum(mathOps::maximum(X, Y), Z); }
-        inline std::int32_t sumComponents() const { return X + Y + Z; }
-        inline std::int32_t sumSqrComponents() const { return X * X + Y * Y + Z * Z; }
-        inline std::int32_t productComponents() const { return X * Y * Z; }
-        inline std::int32_t getComponent(int n) const { return n == 0 ? X : n == 1 ? Y : Z; }
+        inline int32_t minComponent() const { return mathOps::minimum(mathOps::minimum(X, Y), Z); }
+        inline int32_t maxComponent() const { return mathOps::maximum(mathOps::maximum(X, Y), Z); }
+        inline int32_t sumComponents() const { return X + Y + Z; }
+        inline int32_t sumSqrComponents() const { return X * X + Y * Y + Z * Z; }
+        inline int32_t productComponents() const { return X * Y * Z; }
+        inline int32_t getComponent(int n) const { return n == 0 ? X : n == 1 ? Y : Z; }
         inline bool anyComponentNegative() const { return minComponent() < 0.0; }
         inline double magnitudeSquared() const { return sumSqrComponents(); }
         inline double magnitude() const { return std::sqrt(magnitudeSquared()); }
@@ -592,20 +592,20 @@ namespace vim::math3d {
 
         inline friend std::ostream& operator<<(std::ostream& out, const Int3& v) { return (out << "Int3(X = " << v.X << ", Y = " << v.Y << ", Z = " << v.Z << ")"); }
         inline friend Int3 operator+(const Int3& lhs, const Int3& rhs) { return Int3(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z); }
-        inline friend Int3 operator+(const Int3& lhs, std::int32_t rhs) { return Int3(lhs.X + rhs, lhs.Y + rhs, lhs.Z + rhs); }
-        inline friend Int3 operator+(std::int32_t lhs, const Int3& rhs) { return Int3(lhs + rhs.X, lhs + rhs.Y, lhs + rhs.Z); }
+        inline friend Int3 operator+(const Int3& lhs, int32_t rhs) { return Int3(lhs.X + rhs, lhs.Y + rhs, lhs.Z + rhs); }
+        inline friend Int3 operator+(int32_t lhs, const Int3& rhs) { return Int3(lhs + rhs.X, lhs + rhs.Y, lhs + rhs.Z); }
 
         inline friend Int3 operator-(const Int3& lhs, const Int3& rhs) { return Int3(lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z); }
-        inline friend Int3 operator-(const Int3& lhs, std::int32_t rhs) { return Int3(lhs.X - rhs, lhs.Y - rhs, lhs.Z - rhs); }
-        inline friend Int3 operator-(std::int32_t lhs, const Int3& rhs) { return Int3(lhs - rhs.X, lhs - rhs.Y, lhs - rhs.Z); }
+        inline friend Int3 operator-(const Int3& lhs, int32_t rhs) { return Int3(lhs.X - rhs, lhs.Y - rhs, lhs.Z - rhs); }
+        inline friend Int3 operator-(int32_t lhs, const Int3& rhs) { return Int3(lhs - rhs.X, lhs - rhs.Y, lhs - rhs.Z); }
 
         inline friend Int3 operator*(const Int3& lhs, const Int3& rhs) { return Int3(lhs.X * rhs.X, lhs.Y * rhs.Y, lhs.Z * rhs.Z); }
-        inline friend Int3 operator*(const Int3& lhs, std::int32_t rhs) { return Int3(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs); }
-        inline friend Int3 operator*(std::int32_t lhs, const Int3& rhs) { return Int3(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z); }
+        inline friend Int3 operator*(const Int3& lhs, int32_t rhs) { return Int3(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs); }
+        inline friend Int3 operator*(int32_t lhs, const Int3& rhs) { return Int3(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z); }
 
         inline friend Int3 operator/(const Int3& lhs, const Int3& rhs) { return Int3(lhs.X / rhs.X, lhs.Y / rhs.Y, lhs.Z / rhs.Z); }
-        inline friend Int3 operator/(const Int3& lhs, std::int32_t rhs) { return Int3(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs); }
-        inline friend Int3 operator/(std::int32_t lhs, const Int3& rhs) { return Int3(lhs / rhs.X, lhs / rhs.Y, lhs / rhs.Z); }
+        inline friend Int3 operator/(const Int3& lhs, int32_t rhs) { return Int3(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs); }
+        inline friend Int3 operator/(int32_t lhs, const Int3& rhs) { return Int3(lhs / rhs.X, lhs / rhs.Y, lhs / rhs.Z); }
 
         inline friend bool operator<(const Int3& x0, const Int3& x1) { return x0.compare(x1) < 0; }
         inline friend bool operator<=(const Int3& x0, const Int3& x1) { return x0.compare(x1) <= 0; }
@@ -614,13 +614,13 @@ namespace vim::math3d {
     };
 
     struct Int4 final {
-        std::int32_t X;
-        std::int32_t Y;
-        std::int32_t Z;
-        std::int32_t W;
+        int32_t X;
+        int32_t Y;
+        int32_t Z;
+        int32_t W;
 
-        Int4(std::int32_t x, std::int32_t y, std::int32_t z, std::int32_t w) : X(x), Y(y), Z(z), W(w) {}
-        Int4(std::int32_t value) : X(value), Y(value), Z(value), W(value) {}
+        Int4(int32_t x, int32_t y, int32_t z, int32_t w) : X(x), Y(y), Z(z), W(w) {}
+        Int4(int32_t value) : X(value), Y(value), Z(value), W(value) {}
 
         inline static const Int4 zero() { return Int4(0); }
         inline static const Int4 minValue() { return Int4(INT_MIN); }
@@ -631,34 +631,34 @@ namespace vim::math3d {
         inline static const Int4 unitZ() { return Int4(0, 0, 1, 0); }
         inline static const Int4 unitW() { return Int4(0, 0, 0, 1); }
 
-        inline Int4 setX(std::int32_t x) const { return Int4(x, Y, Z, W); }
-        inline Int4 setY(std::int32_t y) const { return Int4(X, y, Z, W); }
-        inline Int4 setZ(std::int32_t z) const { return Int4(X, Y, z, W); }
-        inline Int4 setW(std::int32_t w) const { return Int4(X, Y, Z, w); }
+        inline Int4 setX(int32_t x) const { return Int4(x, Y, Z, W); }
+        inline Int4 setY(int32_t y) const { return Int4(X, y, Z, W); }
+        inline Int4 setZ(int32_t z) const { return Int4(X, Y, z, W); }
+        inline Int4 setW(int32_t w) const { return Int4(X, Y, Z, w); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z, W); }
+        inline size_t hash() const { return hash::combine(X, Y, Z, W); }
         inline bool almostEquals(const Int4& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) <= tolerance
                 && std::fabs(Y - x.Y) <= tolerance
                 && std::fabs(Z - x.Z) <= tolerance
                 && std::fabs(W - x.W) <= tolerance;
         }
-        inline static std::int32_t dot(const Int4& value1, const Int4& value2) {
+        inline static int32_t dot(const Int4& value1, const Int4& value2) {
             return value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z + value1.W * value2.W;
         }
-        inline std::int32_t dot(const Int4& value) const { return dot(*this, value); }
+        inline int32_t dot(const Int4& value) const { return dot(*this, value); }
         inline bool almostZero(float tolerance = constants::tolerance) const {
             return std::fabs(X) < tolerance
                 && std::fabs(Y) < tolerance
                 && std::fabs(Z) < tolerance
                 && std::fabs(W) < tolerance;
         }
-        inline std::int32_t minComponent() const { return mathOps::minimum(mathOps::minimum(mathOps::minimum(X, Y), Z), W); }
-        inline std::int32_t maxComponent() const { return  mathOps::maximum(mathOps::maximum(mathOps::maximum(X, Y), Z), W); }
-        inline std::int32_t sumComponents() const { return X + Y + Z + W; }
-        inline std::int32_t sumSqrComponents() const { return X * X + Y * Y + Z * Z + W * W; }
-        inline std::int32_t productComponents() const { return X * Y * Z * W; }
-        inline std::int32_t getComponent(int n) const { return n == 0 ? X : n == 1 ? Y : n == 2 ? Z : W; }
+        inline int32_t minComponent() const { return mathOps::minimum(mathOps::minimum(mathOps::minimum(X, Y), Z), W); }
+        inline int32_t maxComponent() const { return  mathOps::maximum(mathOps::maximum(mathOps::maximum(X, Y), Z), W); }
+        inline int32_t sumComponents() const { return X + Y + Z + W; }
+        inline int32_t sumSqrComponents() const { return X * X + Y * Y + Z * Z + W * W; }
+        inline int32_t productComponents() const { return X * Y * Z * W; }
+        inline int32_t getComponent(int n) const { return n == 0 ? X : n == 1 ? Y : n == 2 ? Z : W; }
         inline bool anyComponentNegative() const { return minComponent() < 0.0; }
         inline double magnitudeSquared() const { return sumSqrComponents(); }
         inline double magnitude() const { return std::sqrt(magnitudeSquared()); }
@@ -671,20 +671,20 @@ namespace vim::math3d {
         inline friend std::ostream& operator<<(std::ostream& out, const Int4& v) { return (out << "Int4(X = " << v.X << ", Y = " << v.Y << ", Z = " << v.Z << ", W = " << v.W << ")"); }
 
         inline friend Int4 operator+(const Int4& lhs, const Int4& rhs) { return Int4(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z, lhs.W + rhs.W); }
-        inline friend Int4 operator+(const Int4& lhs, std::int32_t rhs) { return Int4(lhs.X + rhs, lhs.Y + rhs, lhs.Z + rhs, lhs.W + rhs); }
-        inline friend Int4 operator+(std::int32_t lhs, const Int4& rhs) { return Int4(lhs + rhs.X, lhs + rhs.Y, lhs + rhs.Z, lhs + rhs.W); }
+        inline friend Int4 operator+(const Int4& lhs, int32_t rhs) { return Int4(lhs.X + rhs, lhs.Y + rhs, lhs.Z + rhs, lhs.W + rhs); }
+        inline friend Int4 operator+(int32_t lhs, const Int4& rhs) { return Int4(lhs + rhs.X, lhs + rhs.Y, lhs + rhs.Z, lhs + rhs.W); }
 
         inline friend Int4 operator-(const Int4& lhs, const Int4& rhs) { return Int4(lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z, lhs.W - rhs.W); }
-        inline friend Int4 operator-(const Int4& lhs, std::int32_t rhs) { return Int4(lhs.X - rhs, lhs.Y - rhs, lhs.Z - rhs, lhs.W - rhs); }
-        inline friend Int4 operator-(std::int32_t lhs, const Int4& rhs) { return Int4(lhs - rhs.X, lhs - rhs.Y, lhs - rhs.Z, lhs - rhs.W); }
+        inline friend Int4 operator-(const Int4& lhs, int32_t rhs) { return Int4(lhs.X - rhs, lhs.Y - rhs, lhs.Z - rhs, lhs.W - rhs); }
+        inline friend Int4 operator-(int32_t lhs, const Int4& rhs) { return Int4(lhs - rhs.X, lhs - rhs.Y, lhs - rhs.Z, lhs - rhs.W); }
 
         inline friend Int4 operator*(const Int4& lhs, const Int4& rhs) { return Int4(lhs.X * rhs.X, lhs.Y * rhs.Y, lhs.Z * rhs.Z, lhs.W * rhs.W); }
-        inline friend Int4 operator*(const Int4& lhs, std::int32_t rhs) { return Int4(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs, lhs.W * rhs); }
-        inline friend Int4 operator*(std::int32_t lhs, const Int4& rhs) { return Int4(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z, lhs * rhs.W); }
+        inline friend Int4 operator*(const Int4& lhs, int32_t rhs) { return Int4(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs, lhs.W * rhs); }
+        inline friend Int4 operator*(int32_t lhs, const Int4& rhs) { return Int4(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z, lhs * rhs.W); }
 
         inline friend Int4 operator/(const Int4& lhs, const Int4& rhs) { return Int4(lhs.X / rhs.X, lhs.Y / rhs.Y, lhs.Z / rhs.Z, lhs.W / rhs.W); }
-        inline friend Int4 operator/(const Int4& lhs, std::int32_t rhs) { return Int4(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs, lhs.W / rhs); }
-        inline friend Int4 operator/(std::int32_t lhs, const Int4& rhs) { return Int4(lhs / rhs.X, lhs / rhs.Y, lhs / rhs.Z, lhs / rhs.W); }
+        inline friend Int4 operator/(const Int4& lhs, int32_t rhs) { return Int4(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs, lhs.W / rhs); }
+        inline friend Int4 operator/(int32_t lhs, const Int4& rhs) { return Int4(lhs / rhs.X, lhs / rhs.Y, lhs / rhs.Z, lhs / rhs.W); }
 
         inline friend bool operator<(const Int4& x0, const Int4& x1) { return x0.compare(x1) < 0; }
         inline friend bool operator<=(const Int4& x0, const Int4& x1) { return x0.compare(x1) <= 0; }
@@ -708,7 +708,7 @@ namespace vim::math3d {
         inline Interval setMin(T x) const { return Interval(x, Max); }
         inline Interval setMax(T x) const { return Interval(Min, x); }
 
-        inline std::size_t hash() const { return hash::combine((Min), (Max)); }
+        inline size_t hash() const { return hash::combine((Min), (Max)); }
         inline bool almostEquals(const Interval& x, float tolerance = constants::tolerance) const {
             return std::fabs(Min - x.Min) <= tolerance
                 && std::fabs(Max - x.Max) <= tolerance;
@@ -828,7 +828,7 @@ namespace vim::math3d {
         inline Vector2<T> setX(T x) const { return Vector2<T>(x, Y); }
         inline Vector2<T> setY(T y) const { return Vector2<T>(X, y); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y); }
+        inline size_t hash() const { return hash::combine(X, Y); }
         inline bool almostEquals(const Vector2<T>& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) <= tolerance && std::fabs(Y - x.Y) <= tolerance;
         }
@@ -1005,7 +1005,7 @@ namespace vim::math3d {
         inline Vector3<T> setY(T y) const { return Vector3<T>(X, y, Z); }
         inline Vector3<T> setZ(T z) const { return Vector3<T>(X, Y, z); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z); }
+        inline size_t hash() const { return hash::combine(X, Y, Z); }
         inline bool almostEquals(const Vector3<T>& x, float tolerance = constants::tolerance) const { return std::fabs(X - x.X) <= tolerance && std::fabs(Y - x.Y) <= tolerance && std::fabs(Z - x.Z) <= tolerance; }
         inline bool almostZero(float tolerance = constants::tolerance) const { return std::fabs(X) < tolerance && std::fabs(Y) < tolerance && std::fabs(Z) < tolerance; }
         inline int compare(const Vector3<T>& x) const { return std::signbit(magnitudeSquared() - x.magnitudeSquared()); }
@@ -1133,7 +1133,7 @@ namespace vim::math3d {
         inline Vector3<T> xyz() const { return Vector3<T>(X, Y, Z); }
         inline Vector2<T> xy() const { return Vector2<T>(X, Y); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z, W); }
+        inline size_t hash() const { return hash::combine(X, Y, Z, W); }
         inline bool almostEquals(const Vector4<T>& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) <= tolerance && std::fabs(Y - x.Y) <= tolerance && std::fabs(Z - x.Z) <= tolerance && std::fabs(W - x.W) <= tolerance;
         }
@@ -1190,7 +1190,7 @@ namespace vim::math3d {
         inline CylindricalCoordinate setAzimuth(T a) const { return CylindricalCoordinate(Radius, a, Height); }
         inline CylindricalCoordinate setHeight(T h) const { return CylindricalCoordinate(Radius, Azimuth, h); }
 
-        inline std::size_t hash() const { return hash::combine(Radius, Azimuth, Height); }
+        inline size_t hash() const { return hash::combine(Radius, Azimuth, Height); }
         inline bool almostEquals(const CylindricalCoordinate& x, float tolerance = constants::tolerance) const {
             return std::fabs(Radius - x.Radius) < tolerance
                 && std::fabs(Azimuth - x.Azimuth) < tolerance
@@ -1223,7 +1223,7 @@ namespace vim::math3d {
         inline GeoCoordinate setLatitude(T x) const { return GeoCoordinate(x, Longitude); }
         inline GeoCoordinate setLongitude(T y) const { return GeoCoordinate(Latitude, y); }
 
-        inline std::size_t hash() const { return hash::combine(Latitude, Longitude); }
+        inline size_t hash() const { return hash::combine(Latitude, Longitude); }
         inline bool almostEquals(const GeoCoordinate& x, float tolerance = constants::tolerance) const {
             return std::fabs(Latitude - x.Latitude) <= tolerance
                 && std::fabs(Longitude - x.Longitude) <= tolerance;
@@ -1296,7 +1296,7 @@ namespace vim::math3d {
         inline LogPolarCoordinate setRho(T r) const { return LogPolarCoordinate(r, Azimuth); }
         inline LogPolarCoordinate setAzimuth(T a) const { return LogPolarCoordinate(Rho, a); }
 
-        inline std::size_t hash() const { return hash::combine(Rho, Azimuth); }
+        inline size_t hash() const { return hash::combine(Rho, Azimuth); }
         inline bool almostEquals(const LogPolarCoordinate& x, float tolerance = constants::tolerance) const {
             return std::fabs(Rho - x.Rho) < tolerance && std::fabs(Azimuth - x.Azimuth) < tolerance;
         }
@@ -1324,7 +1324,7 @@ namespace vim::math3d {
         inline PolarCoordinate setRadius(T r) const { return PolarCoordinate(r, Azimuth); }
         inline PolarCoordinate setAzimuth(T a) const { return PolarCoordinate(Radius, a); }
 
-        inline std::size_t hash() const { return hash::combine(Radius, Azimuth); }
+        inline size_t hash() const { return hash::combine(Radius, Azimuth); }
         inline bool almostEquals(const PolarCoordinate& x, float tolerance = constants::tolerance) const {
             return std::fabs(Radius - x.Radius) < tolerance && std::fabs(Azimuth - x.Azimuth) < tolerance;
         }
@@ -1354,7 +1354,7 @@ namespace vim::math3d {
         inline SphericalCoordinate setAzimuth(T a) const { return SphericalCoordinate(Radius, a, Inclination); }
         inline SphericalCoordinate setInclination(T h) const { return SphericalCoordinate(Radius, Azimuth, h); }
 
-        inline std::size_t hash() const { return hash::combine((Radius), (Azimuth), (Inclination)); }
+        inline size_t hash() const { return hash::combine((Radius), (Azimuth), (Inclination)); }
         inline bool almostEquals(const SphericalCoordinate& x, float tolerance = constants::tolerance) const {
             return std::fabs(Radius - x.Radius) < tolerance
                 && std::fabs(Azimuth - x.Azimuth) < tolerance
@@ -1388,7 +1388,7 @@ namespace vim::math3d {
         inline HorizontalCoordinate<T> setAzimuth(T x) const { return HorizontalCoordinate<T>(x, Inclination); }
         inline HorizontalCoordinate<T> setInclination(T y) const { return HorizontalCoordinate<T>(Azimuth, y); }
 
-        inline std::size_t hash() const { return hash::combine(Azimuth, Inclination); }
+        inline size_t hash() const { return hash::combine(Azimuth, Inclination); }
         inline bool almostEquals(const HorizontalCoordinate<T>& x, float tolerance = constants::tolerance) const {
             return std::fabs(Azimuth - x.Azimuth) <= tolerance && std::fabs(Inclination - x.Inclination) <= tolerance;
         }
@@ -1457,7 +1457,7 @@ namespace vim::math3d {
         inline AxisAngle setAxis(const Vector3<T>& x) const { return AxisAngle(x, Angle); }
         inline AxisAngle setAngle(T x) const { return AxisAngle(Axis, x); }
 
-        inline std::size_t hash() const { return hash::combine((T)Axis.hash(), (Angle)); }
+        inline size_t hash() const { return hash::combine((T)Axis.hash(), (Angle)); }
         inline bool almostEquals(const AxisAngle& x, float tolerance = constants::tolerance) const {
             return std::fabs(Axis.X - x.Axis.X) < tolerance && std::fabs(Axis.Y - x.Axis.Y) < tolerance && std::fabs(Axis.Z - x.Axis.Z) < tolerance && std::fabs(Angle - x.Angle) < tolerance;
         }
@@ -1522,7 +1522,7 @@ namespace vim::math3d {
         inline Plane<T> setNormal(Vector3<T> x) const { return Plane<T>(x, D); }
         inline Plane<T> setD(T x) const { return Plane<T>(Normal, x); }
 
-        inline std::size_t hash() const { return hash::combine((T)Normal.hash(), (D)); }
+        inline size_t hash() const { return hash::combine((T)Normal.hash(), (D)); }
         inline bool almostEquals(const Plane<T>& x, float tolerance = constants::tolerance) const {
             return Normal.almostEquals(x.Normal, tolerance) && std::fabs(D - x.D) < tolerance;
         }
@@ -1845,7 +1845,7 @@ namespace vim::math3d {
         inline Quaternion<T> setZ(T z) const { return Quaternion<T>(X, Y, z, W); }
         inline Quaternion<T> setW(T w) const { return Quaternion<T>(X, Y, Z, w); }
 
-        inline std::size_t hash() const { return hash::combine(X, Y, Z, W); }
+        inline size_t hash() const { return hash::combine(X, Y, Z, W); }
         inline bool almostEquals(const Quaternion<T>& x, float tolerance = constants::tolerance) const {
             return std::fabs(X - x.X) < tolerance && std::fabs(Y - x.Y) < tolerance && std::fabs(Z - x.Z) < tolerance && std::fabs(W - x.W) < tolerance;
         }
@@ -1900,7 +1900,7 @@ namespace vim::math3d {
         inline Transform<T> setPosition(const Vector3<T>& x) const { return Transform<T>(x, Orientation); }
         inline Transform<T> seOrientation(const Quaternion<T>& x) const { return Transform<T>(Position, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(Position.hash(), Orientation.hash()); }
+        inline size_t hash() const { return hash::combineValues(Position.hash(), Orientation.hash()); }
         inline bool almostEquals(const Transform<T>& x, float tolerance = constants::tolerance) const {
             return Position.almostEquals(x.Position, tolerance) && Orientation.almostEquals(x.Orientation, tolerance);
         }
@@ -1931,11 +1931,11 @@ namespace vim::math3d {
         inline Quad<T> setC(Vector3<T> x) const { return Quad<T>(A, B, x, D); }
         inline Quad<T> setD(Vector3<T> x) const { return Quad<T>(A, B, C, x); }
 
-        std::size_t numPoints() const override { return 4; }
-        Vector3<T> getPoint(std::size_t n) const override { return  n == 0 ? A : n == 1 ? B : n == 2 ? C : D; }
+        size_t numPoints() const override { return 4; }
+        Vector3<T> getPoint(size_t n) const override { return  n == 0 ? A : n == 1 ? B : n == 2 ? C : D; }
         Quad<T> map(std::function<Vector3<T>(const Vector3<T>&)> f) const override { return Quad<T>(f(A), f(B), f(C), f(D)); }
 
-        inline std::size_t hash() const { return hash::combineValues(A.hash(), B.hash(), C.hash(), D.hash()); }
+        inline size_t hash() const { return hash::combineValues(A.hash(), B.hash(), C.hash(), D.hash()); }
         inline bool almostEquals(const Quad<T>& x, float tolerance = constants::tolerance) const {
             return A.almostEquals(x.A, tolerance)
                 && B.almostEquals(x.B, tolerance)
@@ -1971,7 +1971,7 @@ namespace vim::math3d {
         inline Quad2D setC(Vector2<T> x) const { return Quad2D(A, B, x, D); }
         inline Quad2D setD(Vector2<T> x) const { return Quad2D(A, B, C, x); }
 
-        inline std::size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash(), D.hash()); }
+        inline size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash(), D.hash()); }
         inline bool almostEquals(const Quad2D& x, float tolerance = constants::tolerance) const {
             return A.almostEquals(x.A, tolerance)
                 && B.almostEquals(x.B, tolerance)
@@ -1996,7 +1996,7 @@ namespace vim::math3d {
 
         Sphere(const Vector3<T>& center, T radius) : Center(center), Radius(radius) {}
         Sphere(const std::vector<Vector3<T>>& p) {
-            if (p.empty()) { throw std::exception("Points Array is empty"); }
+            if (p.empty()) { throw std::invalid_argument("Points Array is empty"); }
             // From "Real-Time Collision Detection" (Page 89)
             auto minx = Vector3<T>(std::numeric_limits<T>::max);
             auto maxx = -minx;
@@ -2021,7 +2021,7 @@ namespace vim::math3d {
                 if (pt.Z > maxz.Z)
                     maxz = pt;
             }
-            if (numPoints == 0) { throw std::exception("You should have at least one point in points."); }
+            if (numPoints == 0) { throw std::invalid_argument("You should have at least one point in points."); }
             auto sqDistX = maxx.distanceSquared(minx);
             auto sqDistY = maxy.distanceSquared(miny);
             auto sqDistZ = maxz.distanceSquared(minz);
@@ -2108,7 +2108,7 @@ namespace vim::math3d {
         inline Sphere<T> setCenter(Vector3<T> x) const { return Sphere<T>(x, Radius); }
         inline Sphere<T> setRadius(T x) const { return Sphere<T>(Center, x); }
 
-        inline std::size_t hash() const { return hash::combine((T)Center.hash(), Radius); }
+        inline size_t hash() const { return hash::combine((T)Center.hash(), Radius); }
         inline bool almostEquals(const Sphere<T>& x, float tolerance = constants::tolerance) const {
             return Center.almostEquals(x.Center, tolerance) && std::fabs(Radius - x.Radius) < tolerance;
         }
@@ -2130,7 +2130,7 @@ namespace vim::math3d {
         static constexpr std::array<int, 4> rightIndices = { 5, 6, 2, 1 };
         static constexpr std::array<int, 4> backIndices = { 6, 7, 3, 2 };
         static constexpr std::array<int, 4> leftIndices = { 7, 4, 0, 3 };
-        const std::size_t count = 2;
+        const size_t count = 2;
 
         Vector3<T> Min;
         Vector3<T> Max;
@@ -2406,7 +2406,7 @@ namespace vim::math3d {
         inline AABox<T> setMin(Vector3<T> x) const { return AABox<T>(x, Max); }
         inline AABox<T> setMax(Vector3<T> x) const { return AABox<T>(Min, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
+        inline size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
         inline bool almostEquals(const AABox<T>& x, float tolerance = constants::tolerance) const {
             return Min.almostEquals(x.Min, tolerance) && Max.almostEquals(x.Max, tolerance);
         }
@@ -2511,7 +2511,7 @@ namespace vim::math3d {
         inline AABox2D<T> setMin(Vector2<T> x) const { return AABox2D<T>(x, Max); }
         inline AABox2D<T> setMax(Vector2<T> x) const { return AABox2D<T>(Min, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
+        inline size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
         inline bool almostEquals(const AABox2D<T>& x, float tolerance = constants::tolerance) const { return Min.almostEquals(x.Min, tolerance) && Max.almostEquals(x.Max, tolerance); }
         inline int compare(const AABox2D<T>& x) const { return std::signbit(magnitudeSquared() - x.magnitudeSquared()); }
 
@@ -2547,7 +2547,7 @@ namespace vim::math3d {
         inline AABox4D setMin(Vector4<T> x) const { return AABox4D(x, Max); }
         inline AABox4D setMax(Vector4<T> x) const { return AABox4D(Min, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
+        inline size_t hash() const { return hash::combineValues(Min.hash(), Max.hash()); }
         inline bool almostEquals(const AABox4D& x, float tolerance = constants::tolerance) const {
             return Min.almostEquals(x.Min, tolerance)
                 && Max.almostEquals(x.Max, tolerance);
@@ -2598,14 +2598,14 @@ namespace vim::math3d {
         inline Vector3<T> lerp(T amount) const { return A + (B - A) * amount; }
         inline Line<T> setLength(T length) const { return Line<T>(A, A + vector().along(length)); }
 
-        std::size_t numPoints() const override { return 2; }
-        Vector3<T> getPoint(std::size_t n) const override { return n == 0 ? A : B; }
+        size_t numPoints() const override { return 2; }
+        Vector3<T> getPoint(size_t n) const override { return n == 0 ? A : B; }
         Line<T> map(std::function<Vector3<T>(const Vector3<T>&)> f) const override { return Line<T>(f(A), f(B)); }
 
         inline Line<T> setA(Vector3<T> x) const { return Line<T>(x, B); }
         inline Line<T> setB(Vector3<T> x) const { return Line<T>(A, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(A.hash(), B.hash()); }
+        inline size_t hash() const { return hash::combineValues(A.hash(), B.hash()); }
         inline bool almostEquals(const Line<T>& x, float tolerance = constants::tolerance) const {
             return A.almostEquals(x.A, tolerance) && B.almostEquals(x.B, tolerance);
         }
@@ -2648,7 +2648,7 @@ namespace vim::math3d {
         inline Line2D<T> setA(Vector2<T> x) const { return Line2D<T>(x, B); }
         inline Line2D<T> setB(Vector2<T> x) const { return Line2D<T>(A, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(A.hash(), B.hash()); }
+        inline size_t hash() const { return hash::combineValues(A.hash(), B.hash()); }
         inline bool almostEquals(const Line2D<T>& x, float tolerance = constants::tolerance) const { return A.almostEquals(x.A, tolerance) && B.almostEquals(x.B, tolerance); }
 
         inline friend bool operator==(const Line2D<T>& o, const Line2D<T>& other) { return o.A == other.A && o.B == other.B; }
@@ -2698,11 +2698,11 @@ namespace vim::math3d {
         inline Line<T> ac() const { return ca().inverse(); }
         inline Line<T> side(int n) { return n == 0 ? ab() : n == 1 ? bc() : ca(); }
 
-        std::size_t numPoints() const override { return 3; }
-        Vector3<T> getPoint(std::size_t n) const override { return  n == 0 ? A : n == 1 ? B : C; }
+        size_t numPoints() const override { return 3; }
+        Vector3<T> getPoint(size_t n) const override { return  n == 0 ? A : n == 1 ? B : C; }
         Triangle<T> map(std::function<Vector3<T>(const Vector3<T>&)> f) const override { return Triangle<T>(f(A), f(B), f(C)); }
 
-        inline std::size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash()); }
+        inline size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash()); }
         inline bool almostEquals(const Triangle<T>& x, float tolerance = constants::tolerance) const {
             return A.almostEquals(x.A, tolerance) && B.almostEquals(x.B, tolerance) && C.almostEquals(x.C, tolerance);
         }
@@ -2717,7 +2717,7 @@ namespace vim::math3d {
 
     template <typename T = float>
     struct Triangle2D final {
-        const std::size_t count = 3;
+        const size_t count = 3;
 
         Vector2<T> A;
         Vector2<T> B;
@@ -2733,7 +2733,7 @@ namespace vim::math3d {
         inline Triangle2D<T> setB(Vector2<T> x) const { return Triangle2D<T>(A, x, C); }
         inline Triangle2D<T> setC(Vector2<T> x) const { return Triangle2D<T>(A, B, x); }
 
-        inline std::size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash()); }
+        inline size_t hash() const { return hash::combine(A.hash(), B.hash(), C.hash()); }
         inline bool almostEquals(const Triangle2D<T>& x, float tolerance = constants::tolerance) const {
             return A.almostEquals(x.A, tolerance) && B.almostEquals(x.B, tolerance) && C.almostEquals(x.C, tolerance);
         }
@@ -2765,7 +2765,7 @@ namespace vim::math3d {
             return (dot11 > 0) && (dot00 > 0) && (dot11 + dot00 < 1);
         }
 
-        inline const Vector2<T>& operator[](std::size_t n) const { if (n == 0) return A; else if (n == 1) return B; else return C; }
+        inline const Vector2<T>& operator[](size_t n) const { if (n == 0) return A; else if (n == 1) return B; else return C; }
         inline friend bool operator==(const Triangle2D<T>& v1, const Triangle2D<T>& v2) { return v1.A == v2.A && v1.B == v2.B && v1.C == v2.C; }
         inline friend bool operator!=(const Triangle2D<T>& v1, const Triangle2D<T>& v2) { return !(v1 == v2); }
         inline friend std::ostream& operator<<(std::ostream& out, const Triangle2D<T>& v) { return (out << "Triangle2D<T>(A = " << v.A << ", B = " << v.B << ", C = " << v.C << ")"); }
@@ -2790,7 +2790,7 @@ namespace vim::math3d {
         inline Ray<T> setPosition(Vector3<T> x) const { return Ray<T>(x, Direction); }
         inline Ray<T> setDirection(Vector3<T> x) const { return Ray<T>(Position, x); }
 
-        inline std::size_t hash() const { return hash::combineValues(Position.hash(), Direction.hash()); }
+        inline size_t hash() const { return hash::combineValues(Position.hash(), Direction.hash()); }
         inline bool almostEquals(const Ray<T>& x, float tolerance = constants::tolerance) const {
             return Position.almostEquals(x.Position, tolerance)
                 && Direction.almostEquals(x.Direction, tolerance);
@@ -3995,8 +3995,8 @@ namespace vim::math3d {
         }
         inline static std::vector<T> values(const std::vector<Matrix4x4<T>>& matrixArray) {
             std::vector<T> ret(matrixArray.size() * 16);
-            for (std::size_t i = 0; i < matrixArray.size(); i++) {
-                std::size_t j = i * 16;
+            for (size_t i = 0; i < matrixArray.size(); i++) {
+                size_t j = i * 16;
                 ret[j + 0] = matrixArray[i].M11;
                 ret[j + 1] = matrixArray[i].M12;
                 ret[j + 2] = matrixArray[i].M13;
@@ -4036,7 +4036,7 @@ namespace vim::math3d {
         }
         inline Matrix4x4<T> inverse() const {
             auto inv = invert();
-            if (!inv.has_value()) { throw std::exception("No inversion of matrix available"); }
+            if (!inv.has_value()) { throw std::logic_error("No inversion of matrix available"); }
             return inv.value();
         }
         inline Matrix4x4<T> transform(const Quaternion<T>& rotation) const {
@@ -4282,7 +4282,7 @@ namespace vim::math3d {
             return result;
         }
 
-        inline std::size_t hash() { return hash::combine({ M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44 }); }
+        inline size_t hash() { return hash::combine({ M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44 }); }
 
         inline friend Matrix4x4<T> operator -(const Matrix4x4<T>& value) {
             Matrix4x4<T> m;

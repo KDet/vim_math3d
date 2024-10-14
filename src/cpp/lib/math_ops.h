@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <type_traits>
+#include <cmath>
 
 #include "constants.h"
 
@@ -62,7 +63,7 @@ namespace vim::math3d::mathOps {
         tanh(T x) { return std::tanh(x); }
 
     template <typename T>
-    inline typename std::enable_if<std::is_arithmetic<T>::value, std::int8_t>::type
+    inline typename std::enable_if<std::is_arithmetic<T>::value, int8_t>::type
         sign(T x) { return x > 0 ? 1 : x < 0 ? -1 : 0; }
 
     template <typename T>
