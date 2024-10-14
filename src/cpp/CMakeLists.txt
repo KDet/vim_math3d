@@ -3,7 +3,7 @@
 set (PROJECT "vim_math3d")
 set (LIBRARY ${PROJECT}_lib)
 
-project (${PROJECT})
+project (${PROJECT} VERSION 1.6.1)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)

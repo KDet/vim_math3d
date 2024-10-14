@@ -157,19 +157,20 @@ int main()
         const auto ray4 = Ray(FVector3(0, 0, -1), FVector3(0, 0, 1));
         const auto triangle4 = Triangle(FVector3(1, 0, 0), FVector3(-1, 0, 0), FVector3(0, 0, 1));
 
+        std::vector<std::optional<float>> values;
         for (auto j = 0; j < 10; j++)
         {
             auto watch = std::chrono::high_resolution_clock::now();
             for (auto i = 0; i < 1000000; i++)
             {
-                intersects(ray1, triangle1);
-                intersects(ray2, triangle2);
-                intersects(ray3, triangle3);
-                intersects(ray4, triangle4);
+                values.push_back(intersects(ray1, triangle1));
+                values.push_back(intersects(ray2, triangle2));
+                values.push_back(intersects(ray3, triangle3));
+                values.push_back(intersects(ray4, triangle4));
             }
 
             auto thombore = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - watch).count();
-            std::cout << "TomboreMoller " << thombore << " ms" << std::endl;
+            std::cout << "TomboreMoller " << thombore << " ms. " << values.size() << " intersects." << std::endl;
         }
     });
 

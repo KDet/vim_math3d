@@ -962,8 +962,7 @@ namespace vim::math3d {
         inline Vector3<T> rejection(const Vector3<T>& v2) const { return *this - projection(v2); }
         inline T angle(const Vector3<T>& v2, float tolerance = constants::tolerance) const
         {
-            auto d = lengthSquared() * std::sqrt(v2.lengthSquared());
-            //std::clamp(dot(v2) / d, (T)-1, (T)1);
+            auto d = std::sqrt(lengthSquared()) * std::sqrt(v2.lengthSquared());
             return d < tolerance ? 0 : std::acos(mathOps::maximum(mathOps::minimum(dot(v2) / d, (T)1), (T)-1));
         }
         inline T signedAngle(const Vector3<T>& to, const Vector3<T>& axis) const { return angle(to) * (std::int8_t)std::signbit(axis.dot(cross(to))); }
@@ -1576,8 +1575,7 @@ namespace vim::math3d {
             Vector3<T> axis = fromA.cross(toB);
             T lengthSquared = axis.lengthSquared();
             if (lengthSquared > 0) {
-                T clamp = mathOps::maximum(mathOps::minimum(fromA.dot(toB), (T)1), (T)-1);
-                return fromAxisAngle(axis / std::sqrt(lengthSquared), std::acos(clamp));
+                return fromAxisAngle(axis / std::sqrt(lengthSquared), std::acos(mathOps::clamp(fromA.dot(toB), (T)-1, (T)1)));
             }
             else {
                 // The vectors are parallel to each other
@@ -2593,7 +2591,7 @@ namespace vim::math3d {
         inline T length() const { return A.distance(B); }
         inline T lengthSquared() const { return A.distanceSquared(B); }
         inline Vector3<T> midPoint() const { return A.average(B); }
-        inline Line<T> normal() const { return Line<T>(A, A + vector().normalize()); }
+        inline Line<T> normalize() const { return Line<T>(A, A + vector().normalize()); }
         inline Line<T> inverse() const { return Line<T>(B, A); }
         inline Vector3<T> lerp(T amount) const { return A + (B - A) * amount; }
         inline Line<T> setLength(T length) const { return Line<T>(A, A + vector().along(length)); }
@@ -2647,6 +2645,14 @@ namespace vim::math3d {
 
         inline Line2D<T> setA(Vector2<T> x) const { return Line2D<T>(x, B); }
         inline Line2D<T> setB(Vector2<T> x) const { return Line2D<T>(A, x); }
+        inline Vector2<T> vector() const { return (B - A).normalize(); }
+        inline Vector2<T> tangent() const { auto v = vector(); return {-v.y, v.x}; }
+        inline Line2D<T> offset(Vector2<T> v) const { return {A + v, B + v}; }
+        inline Line2D<T> parallelOffset(T x = 1) const { return offset(tangent() * x); }
+        inline std::pair<Line2D<T>, Line2D<T>> parallelOffsets(T x = 1) const { return {parallelOffset(x), parallelOffset(-x)}; }
+        inline Vector2<T> lerp(T t) const { return A.lerp(B, t); }
+        inline T lengthSquared() const {  return (B - A).lengthSquared(); }
+        inline T length() const { return std::sqrt(lengthSquared()); }
 
         inline size_t hash() const { return hash::combineValues(A.hash(), B.hash()); }
         inline bool almostEquals(const Line2D<T>& x, float tolerance = constants::tolerance) const { return A.almostEquals(x.A, tolerance) && B.almostEquals(x.B, tolerance); }
@@ -2903,6 +2909,15 @@ namespace vim::math3d {
 
 #define FRay Ray<float>
 #define DRay Ray<double>
+
+    template <typename T = float>
+    struct Decomposition
+    {
+        bool decomposed;
+        Vector3<T> translation;
+        Quaternion<T> rotation;
+        Vector3<T> scale;
+    };
 
     template <typename T = float>
     struct Matrix4x4 final {
@@ -4217,6 +4232,11 @@ namespace vim::math3d {
             return result;
         }
         inline static bool decompose(const Matrix4x4<T>& m, Vector3<T>& scale, Quaternion<T>& rotation, Vector3<T>& trans) { return m.decompose(scale, rotation, trans); }
+        inline Decomposition<T> decompose() const {
+            Decomposition<T> r;
+            r.decomposed = decompose(r.scale, r.rotation, r.translation);
+            return r;
+        }
         inline Matrix4x4<T> transpose() const {
             Matrix4x4<T> result;
 
@@ -4283,6 +4303,24 @@ namespace vim::math3d {
         }
 
         inline size_t hash() { return hash::combine({ M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44 }); }
+        inline bool almostEquals(Matrix4x4<T> other, float tolerance = constants::tolerance) const {
+            return mathOps::almostEquals(M11, other.M11, tolerance) &&
+               mathOps::almostEquals(M12, other.M12, tolerance) &&
+               mathOps::almostEquals(M13, other.M13, tolerance) &&
+               mathOps::almostEquals(M14, other.M14, tolerance) &&
+               mathOps::almostEquals(M21, other.M21, tolerance) &&
+               mathOps::almostEquals(M22, other.M22, tolerance) &&
+               mathOps::almostEquals(M23, other.M23, tolerance) &&
+               mathOps::almostEquals(M24, other.M24, tolerance) &&
+               mathOps::almostEquals(M31, other.M31, tolerance) &&
+               mathOps::almostEquals(M32, other.M32, tolerance) &&
+               mathOps::almostEquals(M33, other.M33, tolerance) &&
+               mathOps::almostEquals(M34, other.M34, tolerance) &&
+               mathOps::almostEquals(M41, other.M41, tolerance) &&
+               mathOps::almostEquals(M42, other.M42, tolerance) &&
+               mathOps::almostEquals(M43, other.M43, tolerance) &&
+               mathOps::almostEquals(M44, other.M44, tolerance);
+        }
 
         inline friend Matrix4x4<T> operator -(const Matrix4x4<T>& value) {
             Matrix4x4<T> m;
@@ -4647,6 +4685,7 @@ namespace vim::math3d {
     template <typename T = float> inline static Vector2<T> toVector2(const T& v) { return Vector2<T>(v); }
     template <typename T = float> inline static Vector2<T> toVector2(const Vector3<T>& v) { return Vector2<T>(v.X, v.Y); }
     template <typename T = float> inline static Vector2<T> toVector2(const Vector4<T>& v) { return Vector2<T>(v.X, v.Y); }
+    template <typename T = float> inline static Vector2<T> toVector2(const Line2D<T>& l) { return l.vector(); }
     template <typename T = float> inline static Vector2<T> toVector2(const Int2& i) { return Vector2<T>(i.X, i.Y); }
     template <typename T = float> inline static Vector2<T> toVector2(const HorizontalCoordinate<T>& angle) { return Vector2<T>(angle.Azimuth, angle.Inclination); }
     template <typename T = float> inline static Vector3<T> toVector3(const T v) { return Vector3<T>(v); }
