@@ -4,35 +4,35 @@
 #include <iostream>
 #include <ctime>
 #include <chrono> 
-
-#include "../lib/vim_math3d.h"
 #include <cassert>
 
-#define vassert(expression, message) (void)(                                                \
-    (!!(expression)) ||                                                                     \
-    (std::cerr << message << std::endl,                                                     \
-     _wassert(_CRT_WIDE(#expression), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)), 0)        \
+#include "../lib/vim_math3d.h"
+
+#define cerrassert(expression, message) (void)(                                          \
+    (!!(expression)) ||                                                                  \
+    (std::cerr << message << std::endl,                                                  \
+    assert(expression), 0)                                                               \
 )
 
 using namespace vim::math3d;
 
 void test(char const* const name, const std::function<void(void)>& func) {
-    try { func();  std::cout << "Test " << name << " is passed." << std::endl; vassert(true,  "Assertion is failed"); }
-    catch (const std::exception& ex) { std::cout << "!!! Test " << name << " is failed !!!" << ex.what() << std::endl; vassert(false,  "Assertion is failed"); }
+    try { func();  std::cout << "Test " << name << " is passed." << std::endl; cerrassert(true,  "Assertion is failed"); }
+    catch (const std::exception& ex) { std::cout << "!!! Test " << name << " is failed !!!" << ex.what() << std::endl; cerrassert(false,  "Assertion is failed"); }
 };
 template<typename T>
 void testException(char const* const name, const std::function<void(void)>& func) {
-    try { func(); std::cout << "!!! Test " << name << " is failed !!!" << std::endl; vassert(false, "Assertion is failed"); }
-    catch (const T& ex) { std::cout << "Test " << name << " is passed." << std::endl; vassert(true, "Assertion is failed"); }
+    try { func(); std::cout << "!!! Test " << name << " is failed !!!" << std::endl; cerrassert(false, "Assertion is failed"); }
+    catch (const T& ex) { std::cout << "Test " << name << " is passed." << std::endl; cerrassert(true, "Assertion is failed"); }
 };
 
 struct Assert {
-    inline static void IsFalse(const bool& value) { vassert(!value,  "Assertion is failed"); }
-    inline static void IsTrue(const bool& value) { vassert(value, "Assertion is failed"); } 
-    template<typename T> inline static void AreEqual(const T& should, const T& is) { vassert(should == is, "Assertion is failed"); }
-    template<typename T> inline static void AreNotEqual(const T& should, const T& is) { vassert(should != is, "Assertion is failed"); }
-    inline static void True(const bool& value, char const* const message = "Assertion is failed") { vassert(value, message); }
-    inline static void False(const bool& value, char const* const message = "Assertion is failed") { vassert(!value, message); }
+    inline static void IsFalse(const bool& value) { cerrassert(!value,  "Assertion is failed"); }
+    inline static void IsTrue(const bool& value) { cerrassert(value, "Assertion is failed"); } 
+    template<typename T> inline static void AreEqual(const T& should, const T& is) { cerrassert(should == is, "Assertion is failed"); }
+    template<typename T> inline static void AreNotEqual(const T& should, const T& is) { cerrassert(should != is, "Assertion is failed"); }
+    inline static void True(const bool& value, char const* const message = "Assertion is failed") { cerrassert(value, message); }
+    inline static void False(const bool& value, char const* const message = "Assertion is failed") { cerrassert(!value, message); }
 };
 
 struct MathHelper
