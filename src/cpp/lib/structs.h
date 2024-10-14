@@ -2124,12 +2124,12 @@ namespace vim::math3d {
     template <typename T = float>
     struct AABox final {
         // CCW
-        static constexpr std::array<int, 4> topIndices = { 0, 1, 2, 3, };
-        static constexpr std::array<int, 4> bottomIndices = { 7, 6, 5, 4 };
-        static constexpr std::array<int, 4> frontIndices = { 4, 5, 1, 0 };
-        static constexpr std::array<int, 4> rightIndices = { 5, 6, 2, 1 };
-        static constexpr std::array<int, 4> backIndices = { 6, 7, 3, 2 };
-        static constexpr std::array<int, 4> leftIndices = { 7, 4, 0, 3 };
+        static constexpr int topIndices[4] = { 0, 1, 2, 3 };
+        static constexpr int bottomIndices[4] = { 7, 6, 5, 4 };
+        static constexpr int frontIndices[4] = { 4, 5, 1, 0 };
+        static constexpr int rightIndices[4] = { 5, 6, 2, 1 };
+        static constexpr int backIndices[4] = { 6, 7, 3, 2 };
+        static constexpr int leftIndices[4] = { 7, 4, 0, 3 };
         const size_t count = 2;
 
         Vector3<T> Min;
@@ -2432,7 +2432,7 @@ namespace vim::math3d {
     template <typename T = float>
     struct AABox2D final {
         // CCW
-        static constexpr std::array<int, 4> indices = { 0, 1, 2, 3, };
+        static constexpr int indices[4] = { 0, 1, 2, 3 };
 
         Vector2<T> Min;
         Vector2<T> Max;

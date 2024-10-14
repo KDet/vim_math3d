@@ -1,50 +1,49 @@
 #pragma once
 
-#include <iostream>
 #include <sstream>
-#include <vector>
-#include <array>
-#include <numeric>
-#include <functional>
-#include <initializer_list>
-#include <optional>
-#include <cassert>
-#include <cstdlib>
+#include <iostream>
 #include <ctime>
 #include <chrono> 
 
-#include "../lib/vim_math3d.h";
+#include "../lib/vim_math3d.h"
+#include <cassert>
 
-using namespace vim::math3d; 
+#define vassert(expression, message) (void)(                                                \
+    (!!(expression)) ||                                                                     \
+    (std::cerr << message << std::endl,                                                     \
+     _wassert(_CRT_WIDE(#expression), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)), 0)        \
+)
+
+using namespace vim::math3d;
 
 void test(char const* const name, const std::function<void(void)>& func) {
-    try { func();  std::cout << "Test " << name << " is passed." << std::endl; assert(true); }
-    catch (const std::exception& ex) { std::cout << "!!! Test " << name << " is failed !!!" << ex.what() << std::endl; assert(false); }
+    try { func();  std::cout << "Test " << name << " is passed." << std::endl; vassert(true,  "Assertion is failed"); }
+    catch (const std::exception& ex) { std::cout << "!!! Test " << name << " is failed !!!" << ex.what() << std::endl; vassert(false,  "Assertion is failed"); }
 };
 template<typename T>
 void testException(char const* const name, const std::function<void(void)>& func) {
-    try { func(); std::cout << "!!! Test " << name << " is failed !!!" << std::endl; assert(false); }
-    catch (const T& ex) { std::cout << "Test " << name << " is passed." << std::endl; assert(true); }
+    try { func(); std::cout << "!!! Test " << name << " is failed !!!" << std::endl; vassert(false, "Assertion is failed"); }
+    catch (const T& ex) { std::cout << "Test " << name << " is passed." << std::endl; vassert(true, "Assertion is failed"); }
 };
 
 struct Assert {
-    inline static void IsFalse(const bool& value) { assert(!value,  "Assertion is failed"); }
-    inline static void IsTrue(const bool& value) { assert(value, "Assertion is failed"); } 
-    template<typename T> inline static void AreEqual(const T& should, const T& is) { assert(should == is, "Assertion is failed"); }
-    template<typename T> inline static void AreNotEqual(const T& should, const T& is) { assert(should != is, "Assertion is failed"); }
-    inline static void True(const bool& value, char const* const message = "Assertion is failed") { assert(value, message); }
-    inline static void False(const bool& value, char const* const message = "Assertion is failed") { assert(!value, message); }
+    inline static void IsFalse(const bool& value) { vassert(!value,  "Assertion is failed"); }
+    inline static void IsTrue(const bool& value) { vassert(value, "Assertion is failed"); } 
+    template<typename T> inline static void AreEqual(const T& should, const T& is) { vassert(should == is, "Assertion is failed"); }
+    template<typename T> inline static void AreNotEqual(const T& should, const T& is) { vassert(should != is, "Assertion is failed"); }
+    inline static void True(const bool& value, char const* const message = "Assertion is failed") { vassert(value, message); }
+    inline static void False(const bool& value, char const* const message = "Assertion is failed") { vassert(!value, message); }
 };
 
 struct MathHelper
 {
-    static constexpr float pi = 3.14159265358979323846;
+    static constexpr float pi = 3.14159265358979323846f;
     static constexpr float piOver2 = pi / 2;
     static constexpr float piOver4 = pi / 4;
 
     template<typename T> static bool Equal(T a, T b) { return (std::fabs(a - b) < 1e-5); }
 
-    static float ToRadians(float degrees) { return degrees * pi / 180.0; }
+    static float ToRadians(float degrees) { return degrees * pi / 180.0f; }
     
     //static bool Equal(double a, double b) { return (std::fabs(a - b) < 1e-5);}
     template<typename T> static bool Equal(const Vector2<T>& a, const Vector2<T>& b) { return Equal(a.X, b.X) && Equal(a.Y, b.Y); }
